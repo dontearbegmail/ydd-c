@@ -1,4 +1,5 @@
 ydd
+libevent/
 
 # Object files
 *.o
