@@ -9,6 +9,7 @@
 #include "comm.h"
 #include "httpchunks.h"
 #include "ydapi_comm.h"
+#include "ydd_libevent.h"
 
 int main(int argc, char *argv[])
 {
@@ -19,6 +20,7 @@ int main(int argc, char *argv[])
 
     //----- APP INIT SECTION
     openlog(NULL, LOG_PID, LOG_USER);
+    yle_setup();
     init_ssl(&ctx, &ssl);
     yc = ydapi_comm_init();
     //----- APP INIT SECTION END
