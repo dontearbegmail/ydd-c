@@ -1,21 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <time.h>
-
-#include <syslog.h>
-
-#include <sys/epoll.h>
-
+#include "general.h"
 #include "comm.h"
-#include "httpchunks.h"
-#include "ydapi_comm.h"
-
-#include <errno.h>
 #include "buddy.h"
 
-#include "common.h"
+#include <sys/epoll.h>
 
 #define MAXEVENTS  64
 
@@ -30,8 +17,6 @@ int main(int argc, char *argv[])
     //----- APP INIT SECTION
     openlog("ydd", LOG_PID, LOG_USER);
     //----- APP INIT SECTION END
-    //
-    msyslog(LOG_INFO, "test");
 
     get_server_addrinfo(NULL, BUDDY_PORT, true, &ai);
     get_ip_string(ai, ip);
@@ -72,7 +57,7 @@ int main(int argc, char *argv[])
     
     int efd, s;
     struct epoll_event event;
-    struct epoll_event events[MAXEVENTS];
+    //struct epoll_event events[MAXEVENTS];
 
     efd = epoll_create1(0);
     if(efd == -1) {
