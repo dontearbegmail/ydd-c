@@ -13,7 +13,9 @@
 #include "ydapi_comm.h"
 
 #include <errno.h>
+#include "buddy.h"
 
+#include "common.h"
 
 #define MAXEVENTS  64
 
@@ -21,35 +23,37 @@ void app_shutdown(int sockfd, struct addrinfo *ai);
 
 int main(int argc, char *argv[])
 {
-    int sockfd;
+    int sockfd = -1;
     struct addrinfo *ai;
     char ip[INET_ADDRSTRLEN];
 
     //----- APP INIT SECTION
-    openlog(NULL, LOG_PID, LOG_USER);
+    openlog("ydd", LOG_PID, LOG_USER);
     //----- APP INIT SECTION END
-    
-    get_server_addrinfo("perenesem.ru", "80", false, &ai);
+    //
+    msyslog(LOG_INFO, "test");
+
+    get_server_addrinfo(NULL, BUDDY_PORT, true, &ai);
     get_ip_string(ai, ip);
-    sockfd = open_connection(ai);
+
+    int e;
+    sockfd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
     if(sockfd == -1) {
-	syslog(LOG_ERR, "Failed open_connection");
+	e = errno;
+	log_errno(e);
 	app_shutdown(sockfd, ai);
 	return -1;
     }
-    
-    size_t sz = 4194304;
-    char msg[sz];
-    memset(msg, 'a', sz);
-    msg[((size_t) sz - 1)] = 0;
-    /*
-    char *request = "GET / HTTP/1.1\r\nHost: lenta.ru\r\n\r\n";
-    if(send_string_to_socket(sockfd, request)) {
-	syslog(LOG_ERR, "Just a part of the request has been sent");
+
+    e = bind(sockfd, ai->ai_addr, ai->ai_addrlen);
+    if(e != 0) {
+	e = errno;
+	log_errno(e);
+	app_shutdown(sockfd, ai);
+	return -1;
     }
-    else {
-	read_from_socket(sockfd);
-    }*/
+
+    syslog(LOG_INFO, "Binded successfully");
 
     if(make_socket_non_blocking(sockfd) == -1) {
 	syslog(LOG_ERR, "Failed to make socket non-blocking");
@@ -57,15 +61,15 @@ int main(int argc, char *argv[])
 	return -1;
     }
 
-    size_t n = send(sockfd, msg, sz, 0);
-    if(n == -1)
-    {
-	int er = errno;
-	if(er == EAGAIN || er == EWOULDBLOCK) {
-	    n = 0;
-	}
+    e = listen(sockfd, 1);
+    if(e == -1) {
+	e = errno;
+	log_errno(e);
+	app_shutdown(sockfd, ai);
+	return -1;
     }
-/*
+
+    
     int efd, s;
     struct epoll_event event;
     struct epoll_event events[MAXEVENTS];
@@ -85,8 +89,12 @@ int main(int argc, char *argv[])
 	app_shutdown(sockfd, ai);
 	return -1;
     }
-*/
 
+    /*
+    while(1) {
+	int n, i;
+	n = epoll_wait(efd, events, MAXEVENTS, -1);
+    }*/
 
     // ---- APP SHUTDOWN SECTION
     app_shutdown(sockfd, ai);

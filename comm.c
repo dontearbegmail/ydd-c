@@ -6,20 +6,14 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <fcntl.h>
 
 #include <openssl/conf.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-#include <assert.h>
-#include <syslog.h>
-#include <errno.h>
-#include <string.h>
-
 #include "httpchunks.h"
-
-// at least 128 bytes for SSL!!!
-#define ERR_BUF_LEN	    256
+#include "common.h"
 
 int send_string_to_socket(int sockfd, char *str)
 {
@@ -65,7 +59,7 @@ void get_ip_string(struct addrinfo *ai, char *inet_addrstr)
 }
 
 
-int get_server_addrinfo(char *host, char *port, struct addrinfo **out_server_addrinfo)
+int get_server_addrinfo(char *host, char *port, bool is_listening, struct addrinfo **out_server_addrinfo)
 {
     struct addrinfo hints, *result;
     int retval = -1;
@@ -73,10 +67,12 @@ int get_server_addrinfo(char *host, char *port, struct addrinfo **out_server_add
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
+    if(is_listening)
+	hints.ai_flags = AI_PASSIVE;
 
     int s = getaddrinfo(host, port, &hints, &result);
     if (s != 0) {
-	fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(s));
+	msyslog(LOG_ERR, "getaddrinfo: %s\n", gai_strerror(s));
     }
     else {
 	*out_server_addrinfo = result;
@@ -94,15 +90,8 @@ void log_ssl_errors(void)
     while(e != 0UL) {
 	e = ERR_get_error();
 	ERR_error_string_n(e, buf, ERR_BUF_LEN);
-	syslog(LOG_ERR, buf);
+	msyslog(LOG_ERR, "%s", buf);
     }
-}
-
-void log_errno(int e)
-{
-    char buf[ERR_BUF_LEN];
-    strerror_r(e, buf, ERR_BUF_LEN);
-    syslog(LOG_ERR, buf);
 }
 
 int init_ssl(SSL_CTX **out_ctx, SSL **out_ssl)
@@ -220,3 +209,83 @@ int close_ssl_connection(int sockfd, SSL *ssl)
     return retval;
 }
 
+int open_connection(struct addrinfo *ai)
+{
+    assert(NULL != ai);
+
+    int e;
+    int sockfd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+    if(sockfd == -1) {
+	e = errno;
+	log_errno(e);
+	return -1;
+    }
+
+    if(connect(sockfd, ai->ai_addr, ai->ai_addrlen) != 0) {
+	e = errno;
+	log_errno(e);
+	return -1;
+    }
+    return sockfd;
+}
+
+int close_connection(int sockfd)
+{
+    int retval = -1;
+
+    if(sockfd != -1)
+	retval = close(sockfd);
+    return retval;
+}
+
+int make_socket_non_blocking(int sockfd)
+{
+    int flags, s;
+
+    flags = fcntl(sockfd, F_GETFL, 0);
+    if (flags == -1) {
+	msyslog(LOG_ERR, "make_socket_non_blocking: couldn't get flags for socket");
+	return -1;
+    }
+
+    flags |= O_NONBLOCK;
+    s = fcntl(sockfd, F_SETFL, flags);
+    if (s == -1) {
+	msyslog(LOG_ERR, "make_socket_non_blocking: failed to set O_NONBLOCK");
+	return -1;
+    }
+
+    return 0;
+}
+
+int create_and_bind_socket(char *port)
+{
+    assert(port != NULL);
+
+    struct addrinfo *ai;
+    char ip[INET_ADDRSTRLEN];
+    int s, sockfd;
+
+    get_server_addrinfo(NULL, port, true, &ai);
+    get_ip_string(ai, ip);
+    msyslog(LOG_INFO, "Will try to bind to %s:%s", ip, port);
+
+    sockfd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+    if(sockfd == -1) {
+	s = errno;
+	log_errno(s);
+	freeaddrinfo(ai);
+	return -1;
+    }
+
+    s = bind(sockfd, ai->ai_addr, ai->ai_addrlen);
+    if(s != 0) {
+	s = errno;
+	log_errno(s);
+	freeaddrinfo(ai);
+	return -1;
+    }
+
+    freeaddrinfo(ai);
+    return sockfd;
+}

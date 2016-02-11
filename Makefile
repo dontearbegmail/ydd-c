@@ -1,15 +1,18 @@
 .PHONY: all clean
 
-all: ydd
+all: ydd buddy
 
 clean:
 	rm -rf ydd *.o
 
 #ydd: ydd.c httpchunks.c ydapi_comm.c comm.c
-#	gcc -g -Wall ydd.c httpchunks.c ydapi_comm.c comm.c -lssl
+#	gcc -std=c99 -g -Wall ydd.c httpchunks.c ydapi_comm.c comm.c -lssl
 
-ydd: ydd.c httpchunks.o ydapi_comm.o comm.o ydd_libevent.o
-	gcc -g -Wall -o ydd ydd.c httpchunks.o ydapi_comm.o comm.o ydd_libevent.o -lssl -levent
+ydd: ydd.c httpchunks.o ydapi_comm.o comm.o common.o
+	gcc -g -Wall -o ydd ydd.c httpchunks.o ydapi_comm.o comm.o common.o -lssl
+
+buddy: buddy.c httpchunks.o ydapi_comm.o comm.o common.o
+	gcc -g -Wall -o buddy buddy.c httpchunks.o ydapi_comm.o comm.o common.o -lssl
 
 httpchunks.o: httpchunks.c
 	gcc -g -Wall -c -o httpchunks.o httpchunks.c
@@ -20,5 +23,5 @@ ydapi_comm.o: ydapi_comm.c
 comm.o: comm.c
 	gcc -g -Wall -c -o comm.o comm.c
 
-ydd_libevent.o: ydd_libevent.c
-	gcc -g -Wall -c -o ydd_libevent.o ydd_libevent.c
+common.o: common.c
+	gcc -g -Wall -c -o common.o common.c

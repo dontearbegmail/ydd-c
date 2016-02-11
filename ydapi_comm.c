@@ -107,7 +107,7 @@ struct ydapi_comm * ydapi_comm_init()
 {
     struct ydapi_comm *yc = malloc(sizeof(struct ydapi_comm));
     yc->httphl = ydapi_init_httph_lines();
-    get_server_addrinfo(YDAPI_SERVADDR, YDAPI_SERVPORT, &(yc->srvinfo)); 
+    get_server_addrinfo(YDAPI_SERVADDR, YDAPI_SERVPORT, false, &(yc->srvinfo)); 
     get_ip_string(yc->srvinfo, yc->srvip);
 
     return yc;
