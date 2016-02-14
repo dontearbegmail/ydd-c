@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <sys/epoll.h>
 
 int send_string_to_socket(int sockfd, char *str)
 {
@@ -91,12 +92,18 @@ int open_connection(struct addrinfo *ai)
     return sockfd;
 }
 
-int close_connection(int sockfd)
+int close_socket(int sockfd)
 {
     int retval = -1;
 
     if(sockfd != -1)
 	retval = close(sockfd);
+
+    if(retval == -1) {
+	int e = errno;
+	log_errno(e);
+    }
+    
     return retval;
 }
 
@@ -128,7 +135,7 @@ int create_and_bind_socket(char *port)
     char ip[INET_ADDRSTRLEN];
     int s, sockfd;
 
-    get_server_addrinfo(NULL, port, true, &ai);
+    get_server_addrinfo("localhost", port, true, &ai);
     get_ip_string(ai, ip);
     msyslog(LOG_INFO, "Will try to bind to %s:%s", ip, port);
 
@@ -144,10 +151,45 @@ int create_and_bind_socket(char *port)
     if(s != 0) {
 	s = errno;
 	log_errno(s);
+	close_socket(sockfd);
 	freeaddrinfo(ai);
 	return -1;
     }
 
     freeaddrinfo(ai);
     return sockfd;
+}
+
+int init_epoll_and_listen(int sockfd, int op)
+{
+    int efd, s;
+    struct epoll_event event;
+
+    if(make_socket_non_blocking(sockfd) == -1) {
+	msyslog(LOG_ERR, "Failed to make socket non-blocking");
+	return -1;
+    }
+
+    s = listen(sockfd, 1);
+    if(s == -1) {
+	s = errno;
+	log_errno(s);
+	return -1;
+    }
+    
+    efd = epoll_create1(0);
+    if(efd == -1) {
+	msyslog(LOG_ERR, "Failed epoll_create1");
+	return -1;
+    }
+
+    event.data.fd = sockfd;
+    event.events = op;
+    s = epoll_ctl(efd, EPOLL_CTL_ADD, sockfd, &event);
+    if(s == -1) {
+	msyslog(LOG_ERR, "Failed to EPOLL_CTL_ADD of read-write events on socket");
+	return -1;
+    }
+
+    return efd;
 }

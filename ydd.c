@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 
 void app_shutdown(int sockfd, struct addrinfo *ai)
 {
-    close_connection(sockfd);
+    close_socket(sockfd);
     freeaddrinfo(ai);
     closelog();
 }
