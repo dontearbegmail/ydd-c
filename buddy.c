@@ -1,9 +1,6 @@
 #include "general.h"
 #include "comm.h"
-
 #include <sys/epoll.h>
-
-#define MAXEVENTS  64
 
 void app_shutdown(int sockfd, struct addrinfo *ai);
 
@@ -13,7 +10,7 @@ int main(int argc, char *argv[])
     char ip[INET_ADDRSTRLEN];
     int sockfd = -1;
     int efd = -1;
-    struct epoll_event events[MAXEVENTS];
+    struct epoll_event events[MAX_EVENTS];
     int n, i;
 
     //----- APP INIT SECTION
@@ -35,7 +32,7 @@ int main(int argc, char *argv[])
     msyslog(LOG_INFO, "Listening on %s:%s, non-blocking socket %d, epollfd %d", ip, BUDDY_PORT, sockfd, efd);
 
     while(1) {
-	n = epoll_wait(efd, events, MAXEVENTS, -1);
+	n = epoll_wait(efd, events, MAX_EVENTS, -1);
 	for(i = 0; i < n; i++) {
 	    if((events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP) || (!(events[i].events & EPOLLIN))) {
 		/* An error has occured on this fd, or the socket is not

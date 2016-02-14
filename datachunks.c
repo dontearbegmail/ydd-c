@@ -1,6 +1,6 @@
 #include <stdlib.h>
-#include <string.h>
 #include "datachunks.h"
+#include "general.h"
 
 struct data_chunks_list * dcl_create()
 {
@@ -46,4 +46,38 @@ int dcl_add_chunk(struct data_chunks_list *dcl, char *chunk, size_t size_below_d
     dcl->length++;
 
     return 0;
+}
+
+struct sfd_dcl_storage *sfd_dcl_create(size_t size)
+{
+    assert(size > 0);
+    struct sfd_dcl_storage *sfd_dcl = malloc(sizeof(struct sfd_dcl_storage));
+    sfd_dcl->size = size;
+    sfd_dcl->count = 0;
+    sfd_dcl->socketfds = malloc(sizeof(int) * size);
+    sfd_dcl->dcls = malloc(sizeof(struct sfd_dcl_storage *) * size);
+
+    size_t i;
+    for(i = 0; i < size; i++) {
+	sfd_dcl->socketfds[i] = 0;
+	sfd_dcl->dcls[i] = NULL;
+    }
+
+    return sfd_dcl;
+}
+
+void sfd_dcl_empty_and_kill(struct sfd_dcl_storage *sfd_dcl)
+{
+    if(sfd_dcl == NULL)
+	return;
+
+    size_t i;
+    for(i = 0; i < sfd_dcl->count; i++) 
+	dcl_empty_and_kill(sfd_dcl->dcls[i]);
+    free(sfd_dcl->socketfds);
+}
+
+void sfd_dcl_add(int sfd_storage[], struct data_chunks_list *dcl_storage[], int size, int *count) {
+    assert(count != NULL);
+    assert(*count <= size);
 }

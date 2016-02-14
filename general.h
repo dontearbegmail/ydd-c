@@ -13,6 +13,9 @@
 
 #define BUDDY_PORT  "11437"
 
+#define MAX_INCOMING_CONNECTIONS    64
+#define MAX_EVENTS  (MAX_INCOMING_CONNECTIONS + 10)
+
 #define msyslog(prior, fmt, args...) syslog(prior, "[%s %s] " fmt, __FILE__, __func__, ##args) 
 #define log_errno(e) _log_errno(__FILE__, __func__, e);
 void _log_errno(const char *file, const char *func, int e);
