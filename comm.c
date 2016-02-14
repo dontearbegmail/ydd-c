@@ -1,5 +1,5 @@
 #include "comm.h"
-#include "httpchunks.h"
+#include "datachunks.h"
 
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -28,11 +28,11 @@ int send_string_to_socket(int sockfd, char *str)
 int read_from_socket(int sockfd)
 {
     int size_recv;
-    char chunk[HTTP_CHUNK_SIZE];
+    char chunk[DATA_CHUNK_SIZE];
     //while(1)
     //{
-    memset(chunk, 0, HTTP_CHUNK_SIZE);
-    if((size_recv = recv(sockfd,  chunk, HTTP_CHUNK_SIZE, 0)) <= 0) {
+    memset(chunk, 0, DATA_CHUNK_SIZE);
+    if((size_recv = recv(sockfd,  chunk, DATA_CHUNK_SIZE, 0)) <= 0) {
 	//		break;
     }
     else {
@@ -127,14 +127,16 @@ int make_socket_non_blocking(int sockfd)
     return 0;
 }
 
-int create_and_bind_socket(char *port)
+int create_and_bind_socket(char *port, struct addrinfo **out_ai)
 {
     assert(port != NULL);
+    assert(out_ai != NULL);
 
     struct addrinfo *ai;
     char ip[INET_ADDRSTRLEN];
     int s, sockfd;
 
+    *out_ai = NULL;
     get_server_addrinfo("localhost", port, true, &ai);
     get_ip_string(ai, ip);
     msyslog(LOG_INFO, "Will try to bind to %s:%s", ip, port);
@@ -156,7 +158,7 @@ int create_and_bind_socket(char *port)
 	return -1;
     }
 
-    freeaddrinfo(ai);
+    *out_ai = ai;
     return sockfd;
 }
 
@@ -192,4 +194,63 @@ int init_epoll_and_listen(int sockfd, int op)
     }
 
     return efd;
+}
+
+int accept_and_epoll(int listening_sfd, int efd, int op) {
+    struct sockaddr in_addr;
+    socklen_t in_len;
+    int infd;
+    char hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
+    int e;
+    struct epoll_event event;
+
+    in_len = sizeof(in_addr);
+    infd = accept(listening_sfd, &in_addr, &in_len);
+    if (infd == -1) {
+	e = errno;
+	if ((e == EAGAIN) || (e == EWOULDBLOCK)) {
+	    /* We have processed all incoming connections. */
+	    return 0;
+	}
+	else {
+	    log_errno(e);
+	    return -1;
+	}
+    }
+
+    e = getnameinfo(&in_addr, in_len, hbuf, sizeof hbuf, sbuf, sizeof sbuf, NI_NUMERICHOST | NI_NUMERICSERV);
+    if(e == 0)
+	msyslog(LOG_INFO, "Accepted connection on socket %d (host=%s, port=%s)\n", infd, hbuf, sbuf);
+
+    /* Make the incoming socket non-blocking and add it to the
+     *                      list of fds to monitor. */
+    e = make_socket_non_blocking(infd);
+    if(e == -1) {
+	msyslog(LOG_ERR, "Failed to make the socket for the new connection non-blocking. Will try to close the socket");
+	close_socket(infd);
+	return -1;
+    }
+
+    event.data.fd = infd;
+    event.events = EPOLLIN | op;
+    e = epoll_ctl(efd, EPOLL_CTL_ADD, infd, &event);
+    if(e == -1) {
+	e = errno;
+	log_errno(e);
+	close_socket(infd);
+	msyslog(LOG_INFO, "Tried to close the incoming socket %d", infd);
+	return -1;
+    }
+
+    return infd;
+}
+
+int read_form_socket_epollet(int sockfd) {
+    /*int done = 0;
+
+    while(true) {
+	size_t count;
+    }*/
+
+    return 0;
 }
