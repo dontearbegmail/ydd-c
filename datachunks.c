@@ -77,7 +77,93 @@ void sfd_dcl_empty_and_kill(struct sfd_dcl_storage *sfd_dcl)
     free(sfd_dcl->socketfds);
 }
 
-void sfd_dcl_add(int sfd_storage[], struct data_chunks_list *dcl_storage[], int size, int *count) {
-    assert(count != NULL);
-    assert(*count <= size);
+void sfd_dcl_add(struct sfd_dcl_storage *sfd_dcl, int sockfd, char *chunk)
+{
+}
+
+int put_to_sorted_array(int v, int *arr, size_t size, size_t *ref_count, size_t *ref_position)
+{
+    /*
+    assert(size > 0);
+    assert(ref_position != NULL);
+    assert(ref_count != NULL);
+
+    bool unique = true;
+    size_t count = *ref_count;
+    size_t pos = 0;
+    bool found = false;
+
+    if(count >= size) {
+	msyslog(LOG_ERR, "Failed to add an item into a sorted array: count:%d >= size:%d", count, size);
+	return -1;
+    }
+
+    if(count == 0) {
+	arr[0] = v;
+	pos = 0;
+	count = 1;
+    }
+    else {
+    }
+
+    *ref_position = pos;
+    *ref_count = count;*/
+    return 0;
+}
+
+bool find_in_sorted_array(int v, int *arr, size_t size, size_t count, size_t *ref_position)
+{
+    bool found = false; // found == true means that value 'v' exists in array in arr[*ref_position]
+    bool finished = false; // (finished == true) && (found == false) means that value 'v' doesn't exist in array,
+			    // but *ref_position contains the position to put 'v'
+    size_t start = 0;
+    size_t end = count;
+    size_t mid;
+    /* If 0 <= pos <= count, it means that the array contents starting from arr[pos] should be shifted right,
+     * and the new element 'v' should be posted to arr[pos] */
+    size_t pos;
+
+    /* Since our array and this function are intended to handle sockfds, and each new sockfd 
+     * is typically bigger than all the previous ones, our bubble search is optimized 
+     * considering this fact (when adding new)  */
+    do {
+	if(v > arr[end]) { // most searches will typically end here (when adding new)
+	    finished = true;
+	    pos = end + 1;
+	}
+	else if(v < arr[start]) {
+	    finished = true;
+	    pos = start;
+	}
+	else if(v == arr[start]) {
+	    found = true;
+	    pos = start + 1;
+	}
+	else if(v == arr[end]) {
+	    found = true;
+	    pos = end + 1;
+	}
+	else {
+	    // now we have arr[start] < v < arr[end]
+	    if(start >= end) {
+		finished = true;
+		pos = count;
+	    }
+	    else {
+		mid = (start + end) / 2;
+		if(v == arr[mid]) {
+		    found = true;
+		    pos = mid;
+		}
+		else if(v < arr[mid])
+		    end = mid > 0 ? (mid - 1) : mid;
+		else
+		    start = mid + 1;
+	    }
+	}
+
+	if(found)
+	    finished = true;
+    } while(!finished);
+    return found;
 }
