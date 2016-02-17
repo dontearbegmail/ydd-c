@@ -1,6 +1,8 @@
 #include "general.h"
 #include "comm.h"
+#include "datachunks.h"
 #include <sys/epoll.h>
+#include <stdio.h>
 
 void app_shutdown(int sockfd, struct addrinfo *ai);
 
@@ -81,3 +83,4 @@ void app_shutdown(int sockfd, struct addrinfo *ai)
     freeaddrinfo(ai);
     closelog();
 }
+

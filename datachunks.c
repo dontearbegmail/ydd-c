@@ -74,50 +74,79 @@ void sfd_dcl_empty_and_kill(struct sfd_dcl_storage *sfd_dcl)
     size_t i;
     for(i = 0; i < sfd_dcl->count; i++) 
 	dcl_empty_and_kill(sfd_dcl->dcls[i]);
+    free(sfd_dcl->dcls);
     free(sfd_dcl->socketfds);
 }
 
-void sfd_dcl_add(struct sfd_dcl_storage *sfd_dcl, int sockfd, char *chunk)
+int sfd_dcl_add(struct sfd_dcl_storage *sfd_dcl, int sockfd, char *chunk)
 {
+    assert(sfd_dcl != NULL);
+    size_t pos;
+    int r = put_to_sorted_array(sockfd, sfd_dcl->socketfds, sfd_dcl->size, &sfd_dcl->count, &pos, false);
+    if(r == 1) {
+	msyslog(LOG_ERR, "Somewhat strange: while trying to add the new sockfd %d to a sfd_dcl table"
+		"found already existing sockfd with the same value at position %d", sockfd, pos);
+    }
+
+    return r;
 }
 
-int put_to_sorted_array(int v, int *arr, size_t size, size_t *ref_count, size_t *ref_position)
+// returns -1 on error, 1 if 'v' is not unique, 0 if everything's OK
+int put_to_sorted_array(int v, int *arr, size_t size, size_t *ref_count, size_t *ref_position, bool insert_duplicate)
 {
-    /*
+    assert(arr != NULL);
     assert(size > 0);
     assert(ref_position != NULL);
     assert(ref_count != NULL);
 
-    bool unique = true;
     size_t count = *ref_count;
-    size_t pos = 0;
+    size_t pos = 0, i;
     bool found = false;
-
-    if(count >= size) {
-	msyslog(LOG_ERR, "Failed to add an item into a sorted array: count:%d >= size:%d", count, size);
-	return -1;
-    }
 
     if(count == 0) {
 	arr[0] = v;
 	pos = 0;
 	count = 1;
     }
+    else if(count == size) {
+	msyslog(LOG_ERR, "Failed to add an item into a sorted array: count:%d = size:%d", count, size);
+	*ref_position = 0;
+	return -1;
+    }
     else {
+	found = find_in_sorted_array(v, arr, size, count, &pos);
+	if(found && (!insert_duplicate)) {
+	    //do nothing
+	}
+	else {
+	    if(pos < count) {
+		for(i = count; i > pos; i--) 
+		    arr[i] = arr[i - 1];
+	    }
+	    count++;
+	    arr[pos] = v;
+	}
     }
 
     *ref_position = pos;
-    *ref_count = count;*/
-    return 0;
+    *ref_count = count;
+    return found ? 1 : 0;
 }
 
+// ref_position will always contain the index to put 'v'; returns true if 'v' already exists in array, false otherwise 
 bool find_in_sorted_array(int v, int *arr, size_t size, size_t count, size_t *ref_position)
 {
+    assert(ref_position != NULL);
+    assert(arr != NULL);
     bool found = false; // found == true means that value 'v' exists in array in arr[*ref_position]
     bool finished = false; // (finished == true) && (found == false) means that value 'v' doesn't exist in array,
 			    // but *ref_position contains the position to put 'v'
     size_t start = 0;
-    size_t end = count;
+    if(count == 0) {
+	*ref_position = 0;
+	return false;
+    }
+    size_t end = count - 1;
     size_t mid;
     /* If 0 <= pos <= count, it means that the array contents starting from arr[pos] should be shifted right,
      * and the new element 'v' should be posted to arr[pos] */
@@ -137,11 +166,11 @@ bool find_in_sorted_array(int v, int *arr, size_t size, size_t count, size_t *re
 	}
 	else if(v == arr[start]) {
 	    found = true;
-	    pos = start + 1;
+	    pos = start;
 	}
 	else if(v == arr[end]) {
 	    found = true;
-	    pos = end + 1;
+	    pos = end;
 	}
 	else {
 	    // now we have arr[start] < v < arr[end]
@@ -165,5 +194,6 @@ bool find_in_sorted_array(int v, int *arr, size_t size, size_t count, size_t *re
 	if(found)
 	    finished = true;
     } while(!finished);
+    *ref_position = pos;
     return found;
 }
