@@ -18,6 +18,8 @@ int main(int argc, char *argv[])
     //----- APP INIT SECTION
     openlog("ydd", LOG_PID, LOG_USER);
     //----- APP INIT SECTION END
+    
+    return 0;
 
     sockfd = create_and_bind_socket(BUDDY_PORT, &ai);
     if(sockfd == -1)

@@ -32,6 +32,7 @@ int dcl_add_chunk(struct data_chunks_list *dcl, char *chunk, size_t size_below_d
 
 struct sfd_dcl_storage *sfd_dcl_create(size_t size);
 void sfd_dcl_empty_and_kill(struct sfd_dcl_storage *sfd_dcl);
+int sfd_dcl_add(struct sfd_dcl_storage *sfd_dcl, int sockfd, char *chunk, size_t size_below_default);
 
 bool find_in_sorted_array(int v, int *arr, size_t size, size_t count, size_t *ref_position);
 int put_to_sorted_array(int v, int *arr, size_t size, size_t *ref_count, size_t *ref_position, bool insert_duplicate);
