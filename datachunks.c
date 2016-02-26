@@ -121,17 +121,18 @@ int put_to_sorted_array(int v, int *arr, size_t size, size_t *ref_count, size_t 
 	pos = 0;
 	count = 1;
     }
-    else if(count >= size) {
-	msyslog(LOG_ERR, "Failed to add an item into a sorted array: count:%d = size:%d", count, size);
-	*ref_position = 0;
-	return -1;
-    }
+    
     else {
 	found = find_in_sorted_array(v, arr, size, count, &pos);
 	if(found && (!insert_duplicate)) {
 	    //do nothing
 	}
 	else {
+	    if(count >= size) {
+		msyslog(LOG_ERR, "Failed to add an item into a sorted array: count:%d = size:%d", count, size);
+		*ref_position = 0;
+		return -1;
+	    }
 	    if(pos < count) {
 		for(i = count; i > pos; i--) 
 		    arr[i] = arr[i - 1];

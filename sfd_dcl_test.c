@@ -5,7 +5,7 @@
 
 void do_sfd_dcl_test() 
 {
-    int SFD_DCL_TEST_SIZE = 8;
+    int SFD_DCL_TEST_SIZE = 7;
     struct dcls_test {
 	size_t pos;
 	char **chunks;
@@ -578,7 +578,7 @@ void do_sfd_dcl_test()
 		printf("Error: trying to add an element to a NULL sfd_dcl");
 		continue;
 	    }
-	    sfd_dcl_add(sfd_dcl, tests[i]->in_add_sockfd, tests[i]->in_add_chunk, strlen(tests[i]->in_add_chunk));
+	    sfd_dcl_add(sfd_dcl, tests[i]->in_add_sockfd, tests[i]->in_add_chunk, strlen(tests[i]->in_add_chunk) + 1);
 	}
 	printf("\n\nTest #%d\n", i);
 	if(check_result(tests[i], sfd_dcl))
