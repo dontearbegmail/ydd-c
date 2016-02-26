@@ -3,6 +3,7 @@
 #include "datachunks.h"
 #include <sys/epoll.h>
 #include <stdio.h>
+#include "test.h"
 
 void app_shutdown(int sockfd, struct addrinfo *ai);
 
@@ -19,6 +20,7 @@ int main(int argc, char *argv[])
     openlog("ydd", LOG_PID, LOG_USER);
     //----- APP INIT SECTION END
     
+    do_sfd_dcl_test();
     return 0;
 
     sockfd = create_and_bind_socket(BUDDY_PORT, &ai);

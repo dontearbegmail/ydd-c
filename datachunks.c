@@ -84,22 +84,21 @@ int sfd_dcl_add(struct sfd_dcl_storage *sfd_dcl, int sockfd, char *chunk, size_t
     assert(sfd_dcl != NULL);
     size_t pos, i, count = sfd_dcl->count;
     int r = put_to_sorted_array(sockfd, sfd_dcl->socketfds, sfd_dcl->size, &count, &pos, false);
-    if(r == 1) {
-	msyslog(LOG_ERR, "Somewhat strange: while trying to add the new sockfd %d to a sfd_dcl table "
-		"found already existing sockfd with the same value at position %d. Can't process the new socket", sockfd, pos);
-    }
-    else if(r == -1) {
+    if(r == -1) {
 	msyslog(LOG_ERR, "Can't process the new socket since sfd_dcl limit reached: size = %d, count = %d", 
 		sfd_dcl->size, sfd_dcl->count);
     }
     else {
-	if(pos < sfd_dcl->count) {
-	    for(i = sfd_dcl->count; i > pos; i--) 
-		sfd_dcl->dcls[i] = sfd_dcl->dcls[i - 1];
+	if(r == 0) { // it means sockfd is a new, so sfd_dcl->socketfds were shifted right from 'pos' to 'count'
+		    // and now we have to do the same with sfd_dcl->dcls
+	    if(pos < sfd_dcl->count) {
+		for(i = sfd_dcl->count; i > pos; i--) 
+		    sfd_dcl->dcls[i] = sfd_dcl->dcls[i - 1];
+	    }
+	    sfd_dcl->dcls[pos] = dcl_create();
+	    sfd_dcl->count = count;
 	}
-	sfd_dcl->dcls[pos] = dcl_create();
 	dcl_add_chunk(sfd_dcl->dcls[pos], chunk, size_below_default);
-	sfd_dcl->count = count;
     }
 
     return r;
