@@ -5,7 +5,7 @@
 
 void do_sfd_dcl_test() 
 {
-    int SFD_DCL_TEST_SIZE = 14;
+    int SFD_DCL_TEST_SIZE = 8;
     struct dcls_test {
 	size_t pos;
 	char **chunks;
@@ -153,6 +153,267 @@ void do_sfd_dcl_test()
 	4
     };
 
+    char *a8_2_chunks[] = {"a5", "a8"};
+    struct dcls_test a8_dcls[] = {
+	{0, a7_0_chunks, 1},
+	{1, a5_1_chunks, 2},
+	{2, a8_2_chunks, 2},
+	{3, a6_3_chunks, 2}
+    };
+    struct sfd_dcl_test a8 = {
+	ACTION_ADD,
+	5,
+	"a8",
+
+	4,
+	a7_sfds,
+	4,
+	a8_dcls,
+	4
+    };
+
+    struct sfds_test a9_sfds[] = {{0, 1}, {1, 3}, {2, 5}, {3, 6}};
+    char *a9_0_chunks[] = {"a7", "a9"};
+    char *a9_1_chunks[] = {"a2", "a3"};
+    char *a9_2_chunks[] = {"a5", "a8"};
+    char *a9_3_chunks[] = {"a4", "a6"};
+    struct dcls_test a9_dcls[] = {
+	{0, a9_0_chunks, 2},
+	{1, a9_1_chunks, 2},
+	{2, a9_2_chunks, 2},
+	{3, a9_3_chunks, 2}
+    };
+    struct sfd_dcl_test a9 = {
+	ACTION_ADD, 
+	1,
+	"a9",
+
+	4,
+	a9_sfds,
+	4,
+	a9_dcls,
+	4
+    };
+
+    struct sfds_test a10_sfds[] = {{0, 1}, {1, 3}, {2, 4}, {3, 5}, {4, 6}};
+    char *a10_0_chunks[] = {"a7", "a9"};
+    char *a10_1_chunks[] = {"a2", "a3"};
+    char *a10_2_chunks[] = {"a10"};
+    char *a10_3_chunks[] = {"a5", "a8"};
+    char *a10_4_chunks[] = {"a4", "a6"};
+    struct dcls_test a10_dcls[] = {
+	{0, a10_0_chunks, 2},
+	{1, a10_1_chunks, 2},
+	{2, a10_2_chunks, 1},
+	{3, a10_3_chunks, 2},
+	{4, a10_4_chunks, 2}
+    };
+    struct sfd_dcl_test a10 = {
+	ACTION_ADD, 
+	4,
+	"a10",
+
+	5,
+	a10_sfds,
+	5,
+	a10_dcls,
+	5
+    };
+
+    struct sfds_test a11_sfds[] = {{0, 1}, {1, 3}, {2, 4}, {3, 5}, {4, 6}, {5, 10}};
+    char *a11_0_chunks[] = {"a7", "a9"};
+    char *a11_1_chunks[] = {"a2", "a3"};
+    char *a11_2_chunks[] = {"a10"};
+    char *a11_3_chunks[] = {"a5", "a8"};
+    char *a11_4_chunks[] = {"a4", "a6"};
+    char *a11_5_chunks[] = {"a11"};
+    struct dcls_test a11_dcls[] = {
+	{0, a11_0_chunks, 2},
+	{1, a11_1_chunks, 2},
+	{2, a11_2_chunks, 1},
+	{3, a11_3_chunks, 2},
+	{4, a11_4_chunks, 2},
+	{5, a11_5_chunks, 1}
+    };
+    struct sfd_dcl_test a11 = {
+	ACTION_ADD, 
+	10,
+	"a11",
+
+	6,
+	a11_sfds,
+	6,
+	a11_dcls,
+	6
+    };
+
+    struct sfds_test a12_sfds[] = {{0, 1}, {1, 3}, {2, 4}, {3, 5}, {4, 6}, {5, 10}};
+    char *a12_0_chunks[] = {"a7", "a9"};
+    char *a12_1_chunks[] = {"a2", "a3"};
+    char *a12_2_chunks[] = {"a10", "a12"};
+    char *a12_3_chunks[] = {"a5", "a8"};
+    char *a12_4_chunks[] = {"a4", "a6"};
+    char *a12_5_chunks[] = {"a11"};
+    struct dcls_test a12_dcls[] = {
+	{0, a12_0_chunks, 2},
+	{1, a12_1_chunks, 2},
+	{2, a12_2_chunks, 2},
+	{3, a12_3_chunks, 2},
+	{4, a12_4_chunks, 2},
+	{5, a12_5_chunks, 1}
+    };
+    struct sfd_dcl_test a12 = {
+	ACTION_ADD, 
+	4,
+	"a12",
+
+	6,
+	a12_sfds,
+	6,
+	a12_dcls,
+	6
+    };
+
+    struct sfds_test a13_sfds[] = {{0, 1}, {1, 3}, {2, 4}, {3, 5}, {4, 6}, {5, 10}};
+    char *a13_0_chunks[] = {"a7", "a9"};
+    char *a13_1_chunks[] = {"a2", "a3"};
+    char *a13_2_chunks[] = {"a10", "a12"};
+    char *a13_3_chunks[] = {"a5", "a8", "a13"};
+    char *a13_4_chunks[] = {"a4", "a6"};
+    char *a13_5_chunks[] = {"a11"};
+    struct dcls_test a13_dcls[] = {
+	{0, a13_0_chunks, 2},
+	{1, a13_1_chunks, 2},
+	{2, a13_2_chunks, 2},
+	{3, a13_3_chunks, 3},
+	{4, a13_4_chunks, 2},
+	{5, a13_5_chunks, 1}
+    };
+    struct sfd_dcl_test a13 = {
+	ACTION_ADD, 
+	5,
+	"a13",
+
+	6,
+	a13_sfds,
+	6,
+	a13_dcls,
+	6
+    };
+    
+    struct sfds_test a14_sfds[] = {{0, 1}, {1, 3}, {2, 4}, {3, 5}, {4, 6}, {5, 10}};
+    char *a14_0_chunks[] = {"a7", "a9"};
+    char *a14_1_chunks[] = {"a2", "a3", "a14"};
+    char *a14_2_chunks[] = {"a10", "a12"};
+    char *a14_3_chunks[] = {"a5", "a8", "a13"};
+    char *a14_4_chunks[] = {"a4", "a6"};
+    char *a14_5_chunks[] = {"a11"};
+    struct dcls_test a14_dcls[] = {
+	{0, a14_0_chunks, 2},
+	{1, a14_1_chunks, 3},
+	{2, a14_2_chunks, 2},
+	{3, a14_3_chunks, 3},
+	{4, a14_4_chunks, 2},
+	{5, a14_5_chunks, 1}
+    };
+    struct sfd_dcl_test a14 = {
+	ACTION_ADD, 
+	3,
+	"a14",
+
+	6,
+	a14_sfds,
+	6,
+	a14_dcls,
+	6
+    };
+
+    struct sfds_test a15_sfds[] = {{0, 1}, {1, 3}, {2, 4}, {3, 5}, {4, 6}, {5, 10}};
+    char *a15_0_chunks[] = {"a7", "a9"};
+    char *a15_1_chunks[] = {"a2", "a3", "a14"};
+    char *a15_2_chunks[] = {"a10", "a12"};
+    char *a15_3_chunks[] = {"a5", "a8", "a13", "a15"};
+    char *a15_4_chunks[] = {"a4", "a6"};
+    char *a15_5_chunks[] = {"a11"};
+    struct dcls_test a15_dcls[] = {
+	{0, a15_0_chunks, 2},
+	{1, a15_1_chunks, 3},
+	{2, a15_2_chunks, 2},
+	{3, a15_3_chunks, 4},
+	{4, a15_4_chunks, 2},
+	{5, a15_5_chunks, 1}
+    };
+    struct sfd_dcl_test a15 = {
+	ACTION_ADD, 
+	5,
+	"a15",
+
+	6,
+	a15_sfds,
+	6,
+	a15_dcls,
+	6
+    };
+
+    struct sfds_test a16_sfds[] = {{0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 10}};
+    char *a16_0_chunks[] = {"a7", "a9"};
+    char *a16_1_chunks[] = {"a16"};
+    char *a16_2_chunks[] = {"a2", "a3", "a14"};
+    char *a16_3_chunks[] = {"a10", "a12"};
+    char *a16_4_chunks[] = {"a5", "a8", "a13", "a15"};
+    char *a16_5_chunks[] = {"a4", "a6"};
+    char *a16_6_chunks[] = {"a11"};
+    struct dcls_test a16_dcls[] = {
+	{0, a16_0_chunks, 2},
+	{1, a16_1_chunks, 1},
+	{2, a16_2_chunks, 3},
+	{3, a16_3_chunks, 2},
+	{4, a16_4_chunks, 4},
+	{5, a16_5_chunks, 2},
+	{6, a16_6_chunks, 1}
+    };
+    struct sfd_dcl_test a16 = {
+	ACTION_ADD, 
+	2,
+	"a16",
+
+	7,
+	a16_sfds,
+	7,
+	a16_dcls,
+	7
+    };
+
+    struct sfds_test a17_sfds[] = {{0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 10}};
+    char *a17_0_chunks[] = {"a7", "a9"};
+    char *a17_1_chunks[] = {"a16", "a17"};
+    char *a17_2_chunks[] = {"a2", "a3", "a14"};
+    char *a17_3_chunks[] = {"a10", "a12"};
+    char *a17_4_chunks[] = {"a5", "a8", "a13", "a15"};
+    char *a17_5_chunks[] = {"a4", "a6"};
+    char *a17_6_chunks[] = {"a11"};
+    struct dcls_test a17_dcls[] = {
+	{0, a17_0_chunks, 2},
+	{1, a17_1_chunks, 2},
+	{2, a17_2_chunks, 3},
+	{3, a17_3_chunks, 2},
+	{4, a17_4_chunks, 4},
+	{5, a17_5_chunks, 2},
+	{6, a17_6_chunks, 1}
+    };
+    struct sfd_dcl_test a17 = {
+	ACTION_ADD, 
+	2,
+	"a17",
+
+	7,
+	a17_sfds,
+	7,
+	a17_dcls,
+	7
+    };
+
+
     void print_test(struct sfd_dcl_test *t)
     {
 	assert(t != NULL);
@@ -295,10 +556,11 @@ void do_sfd_dcl_test()
     }
 
 
-    struct sfd_dcl_test *tests[] = {&a1, &a2, &a3, &a4, &a5, &a6, &a7};
+    struct sfd_dcl_test *tests[] = {&a1, &a2, &a3, &a4, &a5, &a6, &a7, &a8, &a9, 
+	&a10, &a11, &a12, &a13, &a14, &a15, &a16, &a17};
 
     size_t i;
-    size_t nt = 7;
+    size_t nt = 17;
     struct sfd_dcl_storage *sfd_dcl = NULL;
 
 
