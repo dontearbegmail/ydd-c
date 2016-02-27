@@ -600,6 +600,216 @@ void do_sfd_dcl_test()
 	5	
     };
 
+    struct sfds_test a27_sfds[] = {{0, 30}, {1, 35}, {2, 40}, {3, 45}, {4, 50}, {5, 60}};
+    char *a27_1_chunks[] = {"a2", "a3", "a14"};
+    char *a27_2_chunks[] = {"a24"};
+    char *a27_3_chunks[] = {"a10", "a12"};
+    char *a27_4_chunks[] = {"a27"};
+    char *a27_5_chunks[] = {"a5", "a8", "a13", "a15"};
+    char *a27_6_chunks[] = {"a4", "a6"};
+    struct dcls_test a27_dcls[] = {
+	{0, a27_1_chunks, 3},
+	{1, a27_2_chunks, 1},
+	{2, a27_3_chunks, 2},
+	{3, a27_4_chunks, 1},
+	{4, a27_5_chunks, 4},
+	{5, a27_6_chunks, 2},
+    };
+    struct sfd_dcl_test a27 = {
+	ACTION_ADD,
+	45,
+	"a27",
+
+	6,
+	a27_sfds,
+	6,
+        a27_dcls,
+	6	
+    };
+
+    struct sfds_test a28_sfds[] = {{0, 30}, {1, 35}, {2, 40}, {3, 45}, {4, 50}, {5, 60}};
+    char *a28_1_chunks[] = {"a2", "a3", "a14"};
+    char *a28_2_chunks[] = {"a24"};
+    char *a28_3_chunks[] = {"a10", "a12"};
+    char *a28_4_chunks[] = {"a27", "a28"};
+    char *a28_5_chunks[] = {"a5", "a8", "a13", "a15"};
+    char *a28_6_chunks[] = {"a4", "a6"};
+    struct dcls_test a28_dcls[] = {
+	{0, a28_1_chunks, 3},
+	{1, a28_2_chunks, 1},
+	{2, a28_3_chunks, 2},
+	{3, a28_4_chunks, 2},
+	{4, a28_5_chunks, 4},
+	{5, a28_6_chunks, 2},
+    };
+    struct sfd_dcl_test a28 = {
+	ACTION_ADD,
+	45,
+	"a28",
+
+	6,
+	a28_sfds,
+	6,
+        a28_dcls,
+	6	
+    };
+
+    struct sfds_test a29_sfds[] = {{0, 15}, {1, 30}, {2, 35}, {3, 40}, {4, 45}, {5, 50}, {6, 60}};
+    char *a29_0_chunks[] = {"a29"};
+    char *a29_1_chunks[] = {"a2", "a3", "a14"};
+    char *a29_2_chunks[] = {"a24"};
+    char *a29_3_chunks[] = {"a10", "a12"};
+    char *a29_4_chunks[] = {"a27", "a28"};
+    char *a29_5_chunks[] = {"a5", "a8", "a13", "a15"};
+    char *a29_6_chunks[] = {"a4", "a6"};
+    struct dcls_test a29_dcls[] = {
+	{0, a29_0_chunks, 1},
+	{1, a29_1_chunks, 3},
+	{2, a29_2_chunks, 1},
+	{3, a29_3_chunks, 2},
+	{4, a29_4_chunks, 2},
+	{5, a29_5_chunks, 4},
+	{6, a29_6_chunks, 2},
+    };
+    struct sfd_dcl_test a29 = {
+	ACTION_ADD,
+	15,
+	"a29",
+
+	7,
+	a29_sfds,
+	7,
+        a29_dcls,
+	7	
+    };
+
+    struct sfd_dcl_test a30 = {
+	ACTION_ADD,
+	16,
+	"a30",
+
+	7,
+	a29_sfds,
+	7,
+	a29_dcls,
+	7
+    };
+
+    struct sfds_test a31_sfds[] = {{0, 15}, {1, 30}, {2, 35}, {3, 40}, {4, 45}, {5, 50}, {6, 60}};
+    char *a31_0_chunks[] = {"a29", "a31"};
+    char *a31_1_chunks[] = {"a2", "a3", "a14"};
+    char *a31_2_chunks[] = {"a24"};
+    char *a31_3_chunks[] = {"a10", "a12"};
+    char *a31_4_chunks[] = {"a27", "a28"};
+    char *a31_5_chunks[] = {"a5", "a8", "a13", "a15"};
+    char *a31_6_chunks[] = {"a4", "a6"};
+    struct dcls_test a31_dcls[] = {
+	{0, a31_0_chunks, 2},
+	{1, a31_1_chunks, 3},
+	{2, a31_2_chunks, 1},
+	{3, a31_3_chunks, 2},
+	{4, a31_4_chunks, 2},
+	{5, a31_5_chunks, 4},
+	{6, a31_6_chunks, 2},
+    };
+    struct sfd_dcl_test a31 = {
+	ACTION_ADD,
+	15,
+	"a31",
+
+	7,
+	a31_sfds,
+	7,
+        a31_dcls,
+	7	
+    };
+
+    struct sfds_test a32_sfds[] = {{0, 15}, {1, 30}, {2, 35}, {3, 40}, {4, 45}, {5, 50}, {6, 60}};
+    char *a32_0_chunks[] = {"a29", "a31"};
+    char *a32_1_chunks[] = {"a2", "a3", "a14"};
+    char *a32_2_chunks[] = {"a24", "a32"};
+    char *a32_3_chunks[] = {"a10", "a12"};
+    char *a32_4_chunks[] = {"a27", "a28"};
+    char *a32_5_chunks[] = {"a5", "a8", "a13", "a15"};
+    char *a32_6_chunks[] = {"a4", "a6"};
+    struct dcls_test a32_dcls[] = {
+	{0, a32_0_chunks, 2},
+	{1, a32_1_chunks, 3},
+	{2, a32_2_chunks, 2},
+	{3, a32_3_chunks, 2},
+	{4, a32_4_chunks, 2},
+	{5, a32_5_chunks, 4},
+	{6, a32_6_chunks, 2},
+    };
+    struct sfd_dcl_test a32 = {
+	ACTION_ADD,
+	35,
+	"a32",
+
+	7,
+	a32_sfds,
+	7,
+        a32_dcls,
+	7	
+    };
+
+    struct sfds_test a33_sfds[] = {{0, 15}, {1, 30}, {2, 35}, {3, 45}, {4, 50}, {5, 60}};
+    char *a33_0_chunks[] = {"a29", "a31"};
+    char *a33_1_chunks[] = {"a2", "a3", "a14"};
+    char *a33_2_chunks[] = {"a24", "a32"};
+    char *a33_4_chunks[] = {"a27", "a28"};
+    char *a33_5_chunks[] = {"a5", "a8", "a13", "a15"};
+    char *a33_6_chunks[] = {"a4", "a6"};
+    struct dcls_test a33_dcls[] = {
+	{0, a33_0_chunks, 2},
+	{1, a33_1_chunks, 3},
+	{2, a33_2_chunks, 2},
+	{3, a33_4_chunks, 2},
+	{4, a33_5_chunks, 4},
+	{5, a33_6_chunks, 2},
+    };
+    struct sfd_dcl_test a33 = {
+	ACTION_DELETE,
+	40,
+	NULL,
+
+	6,
+	a33_sfds,
+	6,
+        a33_dcls,
+	6	
+    };
+
+    struct sfds_test a34_sfds[] = {{0, 15}, {1, 30}, {2, 35}, {3, 45}, {4, 47}, {5, 50}, {6, 60}};
+    char *a34_0_chunks[] = {"a29", "a31"};
+    char *a34_1_chunks[] = {"a2", "a3", "a14"};
+    char *a34_2_chunks[] = {"a24", "a32"};
+    char *a34_3_chunks[] = {"a27", "a28"};
+    char *a34_4_chunks[] = {};
+    char *a34_5_chunks[] = {"a5", "a8", "a13", "a15"};
+    char *a34_6_chunks[] = {"a4", "a6"};
+    struct dcls_test a34_dcls[] = {
+	{0, a34_0_chunks, 2},
+	{1, a34_1_chunks, 3},
+	{2, a34_2_chunks, 2},
+	{3, a34_3_chunks, 2},
+	{4, a34_4_chunks, 0},
+	{5, a34_5_chunks, 4},
+	{6, a34_6_chunks, 2},
+    };
+    struct sfd_dcl_test a34 = {
+	ACTION_ADD,
+	47,
+	NULL,
+
+	7,
+	a34_sfds,
+	7,
+        a34_dcls,
+	7	
+    };
+
+
     void print_test(struct sfd_dcl_test *t)
     {
 	assert(t != NULL);
@@ -751,10 +961,11 @@ void do_sfd_dcl_test()
 
 
     struct sfd_dcl_test *tests[] = {&a1, &a2, &a3, &a4, &a5, &a6, &a7, &a8, &a9, 
-	&a10, &a11, &a12, &a13, &a14, &a15, &a16, &a17, &a18, &a19, &a20, &a21, &a22, &a23, &a24, &a25, &a26};
+	&a10, &a11, &a12, &a13, &a14, &a15, &a16, &a17, &a18, &a19, &a20, &a21, 
+	&a22, &a23, &a24, &a25, &a26, &a27, &a28, &a29, &a30, &a31, &a32, &a33, &a34};
 
     size_t i;
-    size_t nt = 26;
+    size_t nt = 34;
     struct sfd_dcl_storage *sfd_dcl = NULL;
 
 
@@ -772,7 +983,10 @@ void do_sfd_dcl_test()
 		printf("Error: trying to add an element to a NULL sfd_dcl");
 		continue;
 	    }
-	    sfd_dcl_add(sfd_dcl, tests[i]->in_add_sockfd, tests[i]->in_add_chunk, strlen(tests[i]->in_add_chunk) + 1);
+	    size_t sl = 0;
+	    if(tests[i]->in_add_chunk != NULL)
+		sl = strlen(tests[i]->in_add_chunk) + 1;
+	    sfd_dcl_add(sfd_dcl, tests[i]->in_add_sockfd, tests[i]->in_add_chunk, sl);
 	}
 	else if(tests[i]->action == ACTION_DELETE_INDEX) {
 	    if(sfd_dcl == NULL) {
