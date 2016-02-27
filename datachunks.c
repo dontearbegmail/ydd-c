@@ -29,6 +29,10 @@ void dcl_empty_and_kill(struct data_chunks_list *dcl)
 
 int dcl_add_chunk(struct data_chunks_list *dcl, char *chunk, size_t size_below_default)
 {
+    if(dcl == NULL)
+	return -1;
+    if(chunk == NULL)
+	return -1;
     struct data_chunk *dc = malloc(sizeof(struct data_chunk));
     size_t len = (size_below_default == 0) ? DATA_CHUNK_SIZE : size_below_default;
 
@@ -50,7 +54,8 @@ int dcl_add_chunk(struct data_chunks_list *dcl, char *chunk, size_t size_below_d
 
 struct sfd_dcl_storage *sfd_dcl_create(size_t size)
 {
-    assert(size > 0);
+    if(size == 0)
+	return NULL;
     struct sfd_dcl_storage *sfd_dcl = malloc(sizeof(struct sfd_dcl_storage));
     sfd_dcl->size = size;
     sfd_dcl->count = 0;
@@ -78,10 +83,11 @@ void sfd_dcl_empty_and_kill(struct sfd_dcl_storage *sfd_dcl)
     free(sfd_dcl->socketfds);
 }
 
-// returns same as put_to_sorted_array
+// returns same as put_to_sorted_array, also -2 for NULL sfd_dcl
 int sfd_dcl_add(struct sfd_dcl_storage *sfd_dcl, int sockfd, char *chunk, size_t size_below_default)
 {
-    assert(sfd_dcl != NULL);
+    if(sfd_dcl == NULL)
+	return -2;
     size_t pos, i, count = sfd_dcl->count;
     int r = put_to_sorted_array(sockfd, sfd_dcl->socketfds, sfd_dcl->size, &count, &pos, false);
     if(r == -1) {
@@ -106,7 +112,8 @@ int sfd_dcl_add(struct sfd_dcl_storage *sfd_dcl, int sockfd, char *chunk, size_t
 
 bool sfd_dcl_delete_index(struct sfd_dcl_storage *sfd_dcl, size_t index) 
 {
-    assert(sfd_dcl != NULL);
+    if(sfd_dcl == NULL)
+	return false;
     if(index >= sfd_dcl->count)
 	return false;
     dcl_empty_and_kill(sfd_dcl->dcls[index]);
@@ -122,13 +129,21 @@ bool sfd_dcl_delete_index(struct sfd_dcl_storage *sfd_dcl, size_t index)
     return true;
 }
 
-// returns -1 on array size reached, 1 if 'v' is not unique, 0 if everything's OK
+bool sfd_dcl_delete(struct sfd_dcl_storage *sfd_dcl, int sockfd)
+{
+    if(sfd_dcl == NULL)
+	return false;
+    size_t pos;
+    if(!find_in_sorted_array(sockfd, sfd_dcl->socketfds, sfd_dcl->size, sfd_dcl->count, &pos))
+	return false;
+    return sfd_dcl_delete_index(sfd_dcl, pos);
+}
+
+// returns -1 on array size reached, 1 if 'v' is not unique, 0 if everything's OK, -2 on input data errors
 int put_to_sorted_array(int v, int *arr, size_t size, size_t *ref_count, size_t *ref_position, bool insert_duplicate)
 {
-    assert(arr != NULL);
-    assert(size > 0);
-    assert(ref_position != NULL);
-    assert(ref_count != NULL);
+    if((arr == NULL) || (size == 0) || ( ref_position == NULL) || (ref_count == NULL))
+	return -2;
 
     size_t count = *ref_count;
     size_t pos = 0, i;
@@ -168,8 +183,8 @@ int put_to_sorted_array(int v, int *arr, size_t size, size_t *ref_count, size_t 
 // ref_position will always contain the index to put 'v'; returns true if 'v' already exists in array, false otherwise 
 bool find_in_sorted_array(int v, int *arr, size_t size, size_t count, size_t *ref_position)
 {
-    assert(ref_position != NULL);
-    assert(arr != NULL);
+    if((arr == NULL) || (ref_position == NULL))
+	return false;
     bool found = false; // found == true means that value 'v' exists in array in arr[*ref_position]
     bool finished = false; // (finished == true) && (found == false) means that value 'v' doesn't exist in array,
 			    // but *ref_position contains the position to put 'v'

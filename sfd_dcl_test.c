@@ -575,6 +575,30 @@ void do_sfd_dcl_test()
 	6
     };
 
+    struct sfds_test a26_sfds[] = {{0, 30}, {1, 35}, {2, 40}, {3, 50}, {4, 60}};
+    char *a26_1_chunks[] = {"a2", "a3", "a14"};
+    char *a26_2_chunks[] = {"a24"};
+    char *a26_3_chunks[] = {"a10", "a12"};
+    char *a26_4_chunks[] = {"a5", "a8", "a13", "a15"};
+    char *a26_5_chunks[] = {"a4", "a6"};
+    struct dcls_test a26_dcls[] = {
+	{0, a26_1_chunks, 3},
+	{1, a26_2_chunks, 1},
+	{2, a26_3_chunks, 2},
+	{3, a26_4_chunks, 4},
+	{4, a26_5_chunks, 2},
+    };
+    struct sfd_dcl_test a26 = {
+	ACTION_DELETE,
+	20,
+	NULL,
+
+	5,
+	a26_sfds,
+	5,
+        a26_dcls,
+	5	
+    };
 
     void print_test(struct sfd_dcl_test *t)
     {
@@ -727,10 +751,10 @@ void do_sfd_dcl_test()
 
 
     struct sfd_dcl_test *tests[] = {&a1, &a2, &a3, &a4, &a5, &a6, &a7, &a8, &a9, 
-	&a10, &a11, &a12, &a13, &a14, &a15, &a16, &a17, &a18, &a19, &a20, &a21, &a22, &a23, &a24, &a25};
+	&a10, &a11, &a12, &a13, &a14, &a15, &a16, &a17, &a18, &a19, &a20, &a21, &a22, &a23, &a24, &a25, &a26};
 
     size_t i;
-    size_t nt = 25;
+    size_t nt = 26;
     struct sfd_dcl_storage *sfd_dcl = NULL;
 
 
@@ -756,6 +780,13 @@ void do_sfd_dcl_test()
 		continue;
 	    }
 	    sfd_dcl_delete_index(sfd_dcl, tests[i]->in_add_sockfd);
+	}
+	else if(tests[i]->action == ACTION_DELETE) {
+	    if(sfd_dcl == NULL) {
+		printf("Error: trying to remove an element from a NULL sfd_dcl");
+		continue;
+	    }
+	    sfd_dcl_delete(sfd_dcl, tests[i]->in_add_sockfd);
 	}
 	printf("\n\nTest #%d\n", i);
 	if(check_result(tests[i], sfd_dcl))

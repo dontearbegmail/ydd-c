@@ -34,6 +34,7 @@ struct sfd_dcl_storage *sfd_dcl_create(size_t size);
 void sfd_dcl_empty_and_kill(struct sfd_dcl_storage *sfd_dcl);
 int sfd_dcl_add(struct sfd_dcl_storage *sfd_dcl, int sockfd, char *chunk, size_t size_below_default);
 bool sfd_dcl_delete_index(struct sfd_dcl_storage *sfd_dcl, size_t index);
+bool sfd_dcl_delete(struct sfd_dcl_storage *sfd_dcl, int sockfd);
 
 bool find_in_sorted_array(int v, int *arr, size_t size, size_t count, size_t *ref_position);
 int put_to_sorted_array(int v, int *arr, size_t size, size_t *ref_count, size_t *ref_position, bool insert_duplicate);
