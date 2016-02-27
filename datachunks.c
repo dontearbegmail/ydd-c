@@ -104,6 +104,24 @@ int sfd_dcl_add(struct sfd_dcl_storage *sfd_dcl, int sockfd, char *chunk, size_t
     return r;
 }
 
+bool sfd_dcl_delete_index(struct sfd_dcl_storage *sfd_dcl, size_t index) 
+{
+    assert(sfd_dcl != NULL);
+    if(index >= sfd_dcl->count)
+	return false;
+    dcl_empty_and_kill(sfd_dcl->dcls[index]);
+    size_t pos = index + 1;
+    while(pos < sfd_dcl->count) {
+	sfd_dcl->socketfds[pos - 1] = sfd_dcl->socketfds[pos];
+	sfd_dcl->dcls[pos - 1] = sfd_dcl->dcls[pos];
+	pos++;
+    }
+    sfd_dcl->count--;
+    sfd_dcl->socketfds[sfd_dcl->count] = 0;
+    sfd_dcl->dcls[sfd_dcl->count] = NULL;
+    return true;
+}
+
 // returns -1 on array size reached, 1 if 'v' is not unique, 0 if everything's OK
 int put_to_sorted_array(int v, int *arr, size_t size, size_t *ref_count, size_t *ref_position, bool insert_duplicate)
 {
