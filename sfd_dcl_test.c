@@ -506,25 +506,10 @@ void do_sfd_dcl_test()
 	a22_dcls,
 	6
     };
-/*
-    struct sfds_test a23_sfds[] = {{0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}};
-    char *a22_0_chunks[] = {"a7", "a9"};
-    char *a22_1_chunks[] = {"a16", "a17"};
-    char *a22_2_chunks[] = {"a2", "a3", "a14"};
-    char *a22_3_chunks[] = {"a10", "a12"};
-    char *a22_4_chunks[] = {"a5", "a8", "a13", "a15"};
-    char *a22_5_chunks[] = {"a4", "a6"};
-    struct dcls_test a22_dcls[] = {
-	{0, a22_0_chunks, 2},
-	{1, a22_1_chunks, 2},
-	{2, a22_2_chunks, 3},
-	{3, a22_3_chunks, 2},
-	{4, a22_4_chunks, 4},
-	{5, a22_5_chunks, 2},
-    };
-    struct sfd_dcl_test a22 = {
+
+    struct sfd_dcl_test a23 = {
 	ACTION_DELETE_INDEX,
-	6,
+	10,
 	NULL,
 
 	6,
@@ -533,7 +518,63 @@ void do_sfd_dcl_test()
 	a22_dcls,
 	6
     };
-*/
+
+    struct sfds_test a24_sfds[] = {{0, 10}, {1, 20}, {2, 30}, {3, 35}, {4, 40}, {5, 50}, {6, 60}};
+    char *a24_0_chunks[] = {"a7", "a9"};
+    char *a24_1_chunks[] = {"a16", "a17"};
+    char *a24_2_chunks[] = {"a2", "a3", "a14"};
+    char *a24_3_chunks[] = {"a24"};
+    char *a24_4_chunks[] = {"a10", "a12"};
+    char *a24_5_chunks[] = {"a5", "a8", "a13", "a15"};
+    char *a24_6_chunks[] = {"a4", "a6"};
+    struct dcls_test a24_dcls[] = {
+	{0, a24_0_chunks, 2},
+	{1, a24_1_chunks, 2},
+	{2, a24_2_chunks, 3},
+	{3, a24_3_chunks, 1},
+	{4, a24_4_chunks, 2},
+	{5, a24_5_chunks, 4},
+	{6, a24_6_chunks, 2},
+    };
+    struct sfd_dcl_test a24 = {
+	ACTION_ADD,
+	35,
+	"a24",
+
+	7,
+	a24_sfds,
+	7,
+	a24_dcls,
+	7
+    };
+
+    struct sfds_test a25_sfds[] = {{0, 20}, {1, 30}, {2, 35}, {3, 40}, {4, 50}, {5, 60}};
+    char *a25_0_chunks[] = {"a16", "a17"};
+    char *a25_1_chunks[] = {"a2", "a3", "a14"};
+    char *a25_2_chunks[] = {"a24"};
+    char *a25_3_chunks[] = {"a10", "a12"};
+    char *a25_4_chunks[] = {"a5", "a8", "a13", "a15"};
+    char *a25_5_chunks[] = {"a4", "a6"};
+    struct dcls_test a25_dcls[] = {
+	{0, a25_0_chunks, 2},
+	{1, a25_1_chunks, 3},
+	{2, a25_2_chunks, 1},
+	{3, a25_3_chunks, 2},
+	{4, a25_4_chunks, 4},
+	{5, a25_5_chunks, 2},
+    };
+    struct sfd_dcl_test a25 = {
+	ACTION_DELETE_INDEX,
+	0,
+	NULL,
+
+	6,
+	a25_sfds,
+	6,
+	a25_dcls,
+	6
+    };
+
 
     void print_test(struct sfd_dcl_test *t)
     {
@@ -686,10 +727,10 @@ void do_sfd_dcl_test()
 
 
     struct sfd_dcl_test *tests[] = {&a1, &a2, &a3, &a4, &a5, &a6, &a7, &a8, &a9, 
-	&a10, &a11, &a12, &a13, &a14, &a15, &a16, &a17, &a18, &a19, &a20, &a21, &a22};
+	&a10, &a11, &a12, &a13, &a14, &a15, &a16, &a17, &a18, &a19, &a20, &a21, &a22, &a23, &a24, &a25};
 
     size_t i;
-    size_t nt = 22;
+    size_t nt = 25;
     struct sfd_dcl_storage *sfd_dcl = NULL;
 
 
