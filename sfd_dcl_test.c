@@ -809,6 +809,58 @@ void do_sfd_dcl_test()
 	7	
     };
 
+    struct sfd_dcl_test a35 = {
+	ACTION_ADD,
+	33,
+	NULL,
+
+	7,
+	a34_sfds,
+	7,
+	a34_dcls,
+	7
+    };
+
+    struct sfd_dcl_test a36 = {
+	ACTION_ADD,
+	47,
+	NULL,
+
+	7,
+	a34_sfds,
+	7,
+	a34_dcls,
+	7
+    };
+
+    struct sfds_test a37_sfds[] = {{0, 15}, {1, 30}, {2, 35}, {3, 45}, {4, 47}, {5, 50}, {6, 60}};
+    char *a37_0_chunks[] = {"a29", "a31"};
+    char *a37_1_chunks[] = {"a2", "a3", "a14"};
+    char *a37_2_chunks[] = {"a24", "a32"};
+    char *a37_3_chunks[] = {"a27", "a28"};
+    char *a37_4_chunks[] = {"a37"};
+    char *a37_5_chunks[] = {"a5", "a8", "a13", "a15"};
+    char *a37_6_chunks[] = {"a4", "a6"};
+    struct dcls_test a37_dcls[] = {
+	{0, a37_0_chunks, 2},
+	{1, a37_1_chunks, 3},
+	{2, a37_2_chunks, 2},
+	{3, a37_3_chunks, 2},
+	{4, a37_4_chunks, 1},
+	{5, a37_5_chunks, 4},
+	{6, a37_6_chunks, 2},
+    };
+    struct sfd_dcl_test a37 = {
+	ACTION_ADD,
+	47,
+	"a37",
+
+	7,
+	a37_sfds,
+	7,
+        a37_dcls,
+	7	
+    };
 
     void print_test(struct sfd_dcl_test *t)
     {
@@ -962,10 +1014,11 @@ void do_sfd_dcl_test()
 
     struct sfd_dcl_test *tests[] = {&a1, &a2, &a3, &a4, &a5, &a6, &a7, &a8, &a9, 
 	&a10, &a11, &a12, &a13, &a14, &a15, &a16, &a17, &a18, &a19, &a20, &a21, 
-	&a22, &a23, &a24, &a25, &a26, &a27, &a28, &a29, &a30, &a31, &a32, &a33, &a34};
+	&a22, &a23, &a24, &a25, &a26, &a27, &a28, &a29, &a30, &a31, &a32, &a33, 
+	&a34, &a35, &a36, &a37};
 
     size_t i;
-    size_t nt = 34;
+    size_t nt = 37;
     struct sfd_dcl_storage *sfd_dcl = NULL;
 
 
