@@ -104,7 +104,7 @@ void process_all_incoming_connections(int sockfd, int efd, struct sfd_dcl_storag
 	    break;
 	}
 	else {
-	    msyslog(LOG_INFO, "Successfully accepted an incoming connection on socket %d " 
+	    msyslog(LOG_DEBUG, "Successfully accepted an incoming connection on socket %d " 
 		    "and added it to epoll queue. See log above for details", infd);
 	    int r = sfd_dcl_add(sfd_dcl, infd, NULL, 0);
 	    if(r != 0) { 
@@ -113,7 +113,24 @@ void process_all_incoming_connections(int sockfd, int efd, struct sfd_dcl_storag
 		 * that comes into mind: we added this infd earlier, but the connection was closed, and we didn't
 		 * notice that. So we have to clean DCL for that infd */
 		if(r == 1) {
+		    msyslog(LOG_WARNING, "sfd_dcl returned 1 when adding a new incoming connection "
+			    "with socketfd = %d. Will empty the existing DCL", infd);
+		    sfd_dcl_empty_dcl(sfd_dcl, infd);
 		}
+		else if(r == -1) {
+		    msyslog(LOG_WARNING, "SFD-DCL storage limit reached while trying to add an incoming connection "
+			    "with socketfd = %d. Will close the connection. TODO: add SFD-DCL storage cleaner", infd);
+		    close(infd); // epoll removes infd automatically from its' watchlist
+		}
+		else if(r == -2) {
+		    /* Iput data error?? (i.e. sfd_dcl == NULL) This should never happen, but still... */
+		    msyslog(LOG_WARNING, "Lucky me! sfd_dcl_add returned -2 which means input data error. "
+			    "Don't know what to do, so I'll continue hoping for the best and I'll pray for you :))");
+		}
+	    }
+	    else {
+		msyslog(LOG_DEBUG, "Successfully added the socketfd %d for the incoming connection "
+			"to SFD-DCL storage.", infd);
 	    }
 	}
     }
