@@ -27,8 +27,9 @@ int main(int argc, char *argv[])
     
 #ifndef NDEBUG
     msyslog(LOG_DEBUG, "############# Running tests ");
-    do_sfd_dcl_test(false);
+    do_sfd_dcl_test(true);
     msyslog(LOG_DEBUG, "############# Finished tests ");
+    return 0;
 #endif //!NDEBUG
 
     sockfd = create_and_bind_socket(BUDDY_PORT, &ai);
@@ -105,6 +106,15 @@ void process_all_incoming_connections(int sockfd, int efd, struct sfd_dcl_storag
 	else {
 	    msyslog(LOG_INFO, "Successfully accepted an incoming connection on socket %d " 
 		    "and added it to epoll queue. See log above for details", infd);
+	    int r = sfd_dcl_add(sfd_dcl, infd, NULL, 0);
+	    if(r != 0) { 
+		/* The saddest possible case: we're adding a new incoming connection socket file descriptor to our
+		 * SFD-DCL storage, but it's value is already present there. How could it happen? The only explanation
+		 * that comes into mind: we added this infd earlier, but the connection was closed, and we didn't
+		 * notice that. So we have to clean DCL for that infd */
+		if(r == 1) {
+		}
+	    }
 	}
     }
 }

@@ -12,7 +12,7 @@ struct data_chunks_list * dcl_create()
     return new_dcl;
 }
 
-void dcl_empty_and_kill(struct data_chunks_list *dcl)
+void dcl_empty(struct data_chunks_list *dcl)
 {
     struct data_chunk *dc, *next_dc;
     if(dcl == NULL)
@@ -24,6 +24,16 @@ void dcl_empty_and_kill(struct data_chunks_list *dcl)
 	next_dc = dc->next;
 	free(dc);
     }
+    dcl->first = NULL;
+    dcl->last = NULL;
+    dcl->length = 0;
+}
+
+void dcl_empty_and_kill(struct data_chunks_list *dcl)
+{
+    if(dcl == NULL)
+	return;
+    dcl_empty(dcl);
     free(dcl);
 }
 
@@ -83,7 +93,7 @@ void sfd_dcl_empty_and_kill(struct sfd_dcl_storage *sfd_dcl)
     free(sfd_dcl->socketfds);
 }
 
-// returns same as put_to_sorted_array, also -2 for NULL sfd_dcl
+// returns -1 on array size reached, 1 if 'v' is not unique, 0 if everything's OK, -2 on input data errors
 int sfd_dcl_add(struct sfd_dcl_storage *sfd_dcl, int sockfd, char *chunk, size_t size_below_default)
 {
     if(sfd_dcl == NULL)
@@ -137,6 +147,17 @@ bool sfd_dcl_delete(struct sfd_dcl_storage *sfd_dcl, int sockfd)
     if(!find_in_sorted_array(sockfd, sfd_dcl->socketfds, sfd_dcl->size, sfd_dcl->count, &pos))
 	return false;
     return sfd_dcl_delete_index(sfd_dcl, pos);
+}
+
+bool sfd_dcl_empty_dcl(struct sfd_dcl_storage *sfd_dcl, int sockfd)
+{
+    if(sfd_dcl == NULL)
+	return false;
+    size_t pos;
+    if(!find_in_sorted_array(sockfd, sfd_dcl->socketfds, sfd_dcl->size, sfd_dcl->count, &pos))
+	return false;
+    dcl_empty(sfd_dcl->dcls[pos]);
+    return true;
 }
 
 // returns -1 on array size reached, 1 if 'v' is not unique, 0 if everything's OK, -2 on input data errors
