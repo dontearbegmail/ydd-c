@@ -3,7 +3,10 @@
 #include "datachunks.h"
 #include <sys/epoll.h>
 #include <stdio.h>
-#include "test.h"
+
+#ifndef NDEBUG
+    #include "test.h"
+#endif // !NDEBUG
 
 void app_shutdown(int sockfd, struct addrinfo *ai, struct sfd_dcl_storage *sfd_dcl);
 void process_all_incoming_connections(int sockfd, int efd, struct sfd_dcl_storage *sfd_dcl);
@@ -27,9 +30,8 @@ int main(int argc, char *argv[])
     
 #ifndef NDEBUG
     msyslog(LOG_DEBUG, "############# Running tests ");
-    do_sfd_dcl_test(true);
+    do_sfd_dcl_test(false);
     msyslog(LOG_DEBUG, "############# Finished tests ");
-    return 0;
 #endif //!NDEBUG
 
     sockfd = create_and_bind_socket(BUDDY_PORT, &ai);
@@ -55,9 +57,9 @@ int main(int argc, char *argv[])
     while(1) {
 	n = epoll_wait(efd, events, MAX_EVENTS, -1);
 	for(i = 0; i < n; i++) {
+	    /* An error has occured on this fd, or the socket is not
+	     * ready for reading (why were we notified then?) */
 	    if((events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP) || (!(events[i].events & EPOLLIN))) {
-		/* An error has occured on this fd, or the socket is not
-		 *                  ready for reading (why were we notified then?) */
 		msyslog(LOG_ERR, "epoll error on socket %d", events[i].data.fd);
 		close(events[i].data.fd);
 		continue;
@@ -69,7 +71,7 @@ int main(int argc, char *argv[])
 	    }
 
 	    else {
-		
+
 	    }
 	}
     }
