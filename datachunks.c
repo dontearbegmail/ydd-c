@@ -37,18 +37,18 @@ void dcl_empty_and_kill(struct data_chunks_list *dcl)
     free(dcl);
 }
 
-int dcl_add_chunk(struct data_chunks_list *dcl, char *chunk, size_t size_below_default)
+int dcl_add_chunk(struct data_chunks_list *dcl, char *chunk, size_t size)
 {
     if(dcl == NULL)
 	return -1;
     if(chunk == NULL)
 	return -1;
-    struct data_chunk *dc = malloc(sizeof(struct data_chunk));
-    size_t len = (size_below_default == 0) ? DATA_CHUNK_SIZE : size_below_default;
-
-    if(len > DATA_CHUNK_SIZE)
+    
+    size_t len = size;
+    if((len > DATA_CHUNK_SIZE) || (len == 0))
 	return -1;
 
+    struct data_chunk *dc = malloc(sizeof(struct data_chunk));
     memcpy(dc->chunk, chunk, len);
     dc->actual_size = len;
     dc->next = NULL;
@@ -94,7 +94,7 @@ void sfd_dcl_empty_and_kill(struct sfd_dcl_storage *sfd_dcl)
 }
 
 // returns -1 on array size reached, 1 if 'v' is not unique, 0 if everything's OK, -2 on input data errors
-int sfd_dcl_add(struct sfd_dcl_storage *sfd_dcl, int sockfd, char *chunk, size_t size_below_default)
+int sfd_dcl_add(struct sfd_dcl_storage *sfd_dcl, int sockfd, char *chunk, size_t size)
 {
     if(sfd_dcl == NULL)
 	return -2;
@@ -114,7 +114,7 @@ int sfd_dcl_add(struct sfd_dcl_storage *sfd_dcl, int sockfd, char *chunk, size_t
 	    sfd_dcl->dcls[pos] = dcl_create();
 	    sfd_dcl->count = count;
 	}
-	dcl_add_chunk(sfd_dcl->dcls[pos], chunk, size_below_default);
+	dcl_add_chunk(sfd_dcl->dcls[pos], chunk, size);
     }
 
     return r;

@@ -245,38 +245,37 @@ int accept_and_epoll(int listening_sfd, int efd, int op) {
     return infd;
 }
 
-/* returns 0 if all data is read and the socket must be closed
- * 1 if EAGAIN
- * -1 if error and the socket must be closed
+/* returns 
+ *	READ_S_ALL_DONE	    if all data is read and the socket must be closed
+ *	READ_S_GOT_EGAIN    if EAGAIN
+ *	READ_S_GOT_ERROR    if error and the socket must be closed
+ *	READ_S_KEEP_READING should never return that
  * */
-int read_form_socket_epollet(int sockfd, struct sfd_dcl_storage *sfd_dcl) {
-    const int all_done = 0;
-    const int got_eagain = 1;
-    const int got_error = -1;
-    const int keep_reading = 2;
+int read_form_socket_epollet(int sockfd, struct sfd_dcl_storage *sfd_dcl)
+{
     ssize_t count;
     char buf[DATA_CHUNK_SIZE];
     int e;
-    int state = keep_reading;
+    int state = READ_S_KEEP_READING;
 
-    while(state == keep_reading) {
+    while(state == READ_S_KEEP_READING) {
 	count = read(sockfd, buf, DATA_CHUNK_SIZE);
 	if(count == -1) {
 	    e = errno;
 	    /* If errno == EAGAIN, that means we have read all data available in the socket by now and have to return */
-	    if(e == got_eagain) {
-		state = got_eagain;
+	    if(e == EAGAIN) {
+		state = READ_S_GOT_EAGAIN;
 	    }
 	    else {
 		log_errno(e);
-		state = got_error;
+		state = READ_S_GOT_ERROR;
 	    }
 	}
 	/* End of file. The remote has closed the connection */
 	else if(count == 0) {
-	    state = all_done;
+	    state = READ_S_ALL_DONE;
 	}
-	if(state == keep_reading) 
+	if(state == READ_S_KEEP_READING) 
 	    sfd_dcl_add(sfd_dcl, sockfd, buf, count);
     }
 
