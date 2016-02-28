@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "datachunks.h"
 
-void do_sfd_dcl_test() 
+void do_sfd_dcl_test(bool verbose) 
 {
     int SFD_DCL_TEST_SIZE = 7;
     struct dcls_test {
@@ -1020,7 +1020,7 @@ void do_sfd_dcl_test()
     size_t i;
     size_t nt = 37;
     struct sfd_dcl_storage *sfd_dcl = NULL;
-
+    bool failure = false;
 
     for(i = 0; i < nt; i++) {	
 	if(tests[i]->action == ACTION_CREATE) {
@@ -1055,14 +1055,20 @@ void do_sfd_dcl_test()
 	    }
 	    sfd_dcl_delete(sfd_dcl, tests[i]->in_add_sockfd);
 	}
-	printf("\n\nTest #%d\n", i);
-	if(check_result(tests[i], sfd_dcl))
-	    printf("\n++ passed ++\n");
-	else 
-	    printf("\n##### FAILED #####\n");
+	failure = !check_result(tests[i], sfd_dcl);
+	if(verbose) {
+	    printf("\n\nTest #%d\n", i);
+	    if(!failure) 
+		printf("\n++ passed ++\n");
+	    else  
+		printf("\n##### FAILED #####\n");
 
 	    print_test(tests[i]);
 	    print_sfd_dcl(sfd_dcl);
+	}
+	if(failure && (!verbose)) {
+	    printf("\n!!!!!!!!! One or more tests in do_sfd_dcl_test failed. Call it with verbose = true for details\n");
+	}
     }
 
     if(sfd_dcl != NULL)

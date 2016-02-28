@@ -6,16 +6,13 @@
 #include "test.h"
 
 void app_shutdown(int sockfd, struct addrinfo *ai, struct sfd_dcl_storage *sfd_dcl);
-void process_all_incoming_connections(int sockfd, int efd, struct sfd_dcl_storage *sfd_dcl);
+void process_incoming_connections(int sockfd, int efd, struct sfd_dcl_storage *sfd_dcl);
 
 int main(int argc, char *argv[])
 {
     struct addrinfo *ai = NULL;
     char ip[INET_ADDRSTRLEN];
-
-    /* Main listening socket for accepting incoming connections */
     int sockfd = -1;
-    /* Main epoll queue fd */
     int efd = -1;
     struct epoll_event events[MAX_EVENTS];
     struct sfd_dcl_storage *sfd_dcl = NULL;
@@ -62,9 +59,8 @@ int main(int argc, char *argv[])
 		continue;
 	    }
 
-	    /* An event on our main listening socket - say hello to incoming connection(s) */
 	    else if(sockfd == events[i].data.fd) {
-		process_all_incoming_connections(sockfd, efd, sfd_dcl);
+
 	    }
 
 	    else {
@@ -87,7 +83,7 @@ void app_shutdown(int sockfd, struct addrinfo *ai, struct sfd_dcl_storage *sfd_d
     closelog();
 }
 
-void process_all_incoming_connections(int sockfd, int efd, struct sfd_dcl_storage *sfd_dcl)
+void process_incoming_connections(int sockfd, int efd, struct sfd_dcl_storage *sfd_dcl)
 {
     msyslog(LOG_DEBUG, "Starting to accept incoming connections");
     while(1) {
