@@ -29,6 +29,7 @@ struct sfd_dcl_storage {
 struct data_chunks_list * dcl_create();
 void dcl_empty_and_kill(struct data_chunks_list *dcl);
 int dcl_add_chunk(struct data_chunks_list *dcl, char *chunk, size_t size_below_default);
+char * dcl_get_data(struct data_chunks_list *dcl);
 
 struct sfd_dcl_storage *sfd_dcl_create(size_t size);
 void sfd_dcl_empty_and_kill(struct sfd_dcl_storage *sfd_dcl);

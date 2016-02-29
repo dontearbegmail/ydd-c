@@ -8,8 +8,8 @@ clean:
 ydd: ydd.c datachunks.o ydapi_comm.o comm.o general.o
 	gcc -g -Wall -o ydd ydd.c datachunks.o ydapi_comm.o comm.o general.o -lssl
 
-buddy: buddy.c datachunks.o ydapi_comm.o comm.o general.o sfd_dcl_test.o
-	gcc -g -Wall -o buddy buddy.c datachunks.o ydapi_comm.o comm.o general.o sfd_dcl_test.o -lssl
+buddy: buddy.c datachunks.o ydapi_comm.o comm.o general.o sfd_dcl_test.o dcl_test.o
+	gcc -g -Wall -o buddy buddy.c datachunks.o ydapi_comm.o comm.o general.o sfd_dcl_test.o dcl_test.o -lssl
 
 datachunks.o: datachunks.c
 	gcc -g -Wall -c -o datachunks.o datachunks.c
@@ -25,3 +25,6 @@ general.o: general.c
 
 sfd_dcl_test.o: sfd_dcl_test.c
 	gcc -g -Wall -c -o sfd_dcl_test.o sfd_dcl_test.c
+
+dcl_test.o: dcl_test.c
+	gcc -g -Wall -c -o dcl_test.o dcl_test.c

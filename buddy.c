@@ -71,6 +71,7 @@ int main(int argc, char *argv[])
 	    }
 
 	    else {
+		//int read_state = read_from_socket_epollet(events[i].data.fd, sfd_dcl);
 	    }
 	}
     }

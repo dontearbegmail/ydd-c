@@ -62,6 +62,34 @@ int dcl_add_chunk(struct data_chunks_list *dcl, char *chunk, size_t size)
     return 0;
 }
 
+char * dcl_get_data(struct data_chunks_list *dcl)
+{
+    if(dcl == NULL)
+	return NULL;
+    if(dcl->length == 0)
+	return NULL;
+
+    size_t total = 0;
+    struct data_chunk *dc = dcl->first;
+    while(dc != NULL) {
+	total += dc->actual_size;
+	dc = dc->next;
+    }
+
+    total++;
+    char *data = malloc(total);
+    int start = 0;
+    dc = dcl->first;
+    while(dc != NULL) {
+	if((dc->chunk != NULL) && (dc->actual_size > 0))
+	    memcpy(data + start, dc->chunk, dc->actual_size);
+	start = start + dc->actual_size;
+	dc = dc->next;
+    }
+    data[total - 1] = 0;
+    return data;
+}
+
 struct sfd_dcl_storage *sfd_dcl_create(size_t size)
 {
     if(size == 0)
