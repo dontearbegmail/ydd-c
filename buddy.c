@@ -31,7 +31,9 @@ int main(int argc, char *argv[])
 #ifndef NDEBUG
     msyslog(LOG_DEBUG, "############# Running tests ");
     do_sfd_dcl_test(false);
+    do_dcl_test(true);
     msyslog(LOG_DEBUG, "############# Finished tests ");
+    return 0;
 #endif //!NDEBUG
 
     sockfd = create_and_bind_socket(BUDDY_PORT, &ai);
