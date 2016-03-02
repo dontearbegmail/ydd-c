@@ -62,7 +62,7 @@ int dcl_add_chunk(struct data_chunks_list *dcl, char *chunk, size_t size)
     return 0;
 }
 
-char * dcl_get_data(struct data_chunks_list *dcl)
+char * dcl_get_data(struct data_chunks_list *dcl, size_t *ref_size)
 {
     if(dcl == NULL)
 	return NULL;
@@ -87,6 +87,8 @@ char * dcl_get_data(struct data_chunks_list *dcl)
 	dc = dc->next;
     }
     data[total - 1] = 0;
+    if(ref_size != NULL)
+	*ref_size = total;
     return data;
 }
 
