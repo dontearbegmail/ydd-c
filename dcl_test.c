@@ -319,11 +319,12 @@ void do_dcl_test(bool verbose)
 	&a11, &a12, &a13, &a14, &a15, &a16, &a17, &a18};
     size_t nt = 18;
     size_t i;
-    bool passed;
+    bool passed = true;
+    bool total_passed = true;
     struct data_chunks_list *dcl = NULL;
 
     for(i = 0; i < nt; i++) {
-	if(verbose);
+	if(verbose)
 	    printf("########### Test a%d \n", i);
 
 	if(tests[i]->action == ACTION_CREATE) {
@@ -361,7 +362,12 @@ void do_dcl_test(bool verbose)
 	    print_dcl(dcl);
 	    printf("\n\n");
 	}
+	if(!passed)
+	    total_passed = false;
     }
+    if(!verbose && !total_passed) 
+	printf("One of dcl_test.c tests failed. Turn on verbose mode for details\n");
+    
     if(dcl != NULL)
 	dcl_empty_and_kill(dcl);
 }
