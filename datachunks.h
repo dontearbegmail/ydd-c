@@ -3,7 +3,7 @@
 
 #include "general.h"
 
-#define DATA_CHUNK_SIZE 4096
+#define DATA_CHUNK_SIZE 4096 
 
 struct data_chunk {
     char chunk[DATA_CHUNK_SIZE];

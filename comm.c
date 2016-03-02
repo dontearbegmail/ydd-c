@@ -6,6 +6,10 @@
 #include <fcntl.h>
 #include <sys/epoll.h>
 
+#ifndef NDEBUG
+#include <stdio.h>
+#endif
+
 int send_string_to_socket(int sockfd, char *str)
 {
     size_t len, bytes_sent, remaining_len, total_bytes_sent;
@@ -262,6 +266,9 @@ int read_form_socket_epollet(int sockfd, struct sfd_dcl_storage *sfd_dcl, size_t
     int state = READ_S_KEEP_READING;
 
     while(state == READ_S_KEEP_READING) {
+/*#ifndef NDEBUG
+	printf("Will read next %d bytes\n", DATA_CHUNK_SIZE);
+#endif*/
 	count = read(sockfd, buf, DATA_CHUNK_SIZE);
 	if(count == -1) {
 	    e = errno;
@@ -280,6 +287,10 @@ int read_form_socket_epollet(int sockfd, struct sfd_dcl_storage *sfd_dcl, size_t
 	}
 	if(state == READ_S_KEEP_READING) 
 	    sfd_dcl_add(sfd_dcl, sockfd, buf, count, ref_dcl_index);
+/*#ifndef NDEBUG
+	if(count >= 0) 
+	    printf("Have read the following %d bytes: %.*s\n", count, count, buf);
+#endif*/
     }
 
     return state;
