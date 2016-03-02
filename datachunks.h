@@ -34,7 +34,7 @@ char * dcl_get_data(struct data_chunks_list *dcl, size_t *ref_size);
 
 struct sfd_dcl_storage *sfd_dcl_create(size_t size);
 void sfd_dcl_empty_and_kill(struct sfd_dcl_storage *sfd_dcl);
-int sfd_dcl_add(struct sfd_dcl_storage *sfd_dcl, int sockfd, char *chunk, size_t size_below_default);
+int sfd_dcl_add(struct sfd_dcl_storage *sfd_dcl, int sockfd, char *chunk, size_t size, size_t *ref_index);
 bool sfd_dcl_delete_index(struct sfd_dcl_storage *sfd_dcl, size_t index);
 bool sfd_dcl_delete(struct sfd_dcl_storage *sfd_dcl, int sockfd);
 bool sfd_dcl_empty_dcl(struct sfd_dcl_storage *sfd_dcl, int sockfd);

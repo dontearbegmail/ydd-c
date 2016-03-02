@@ -124,12 +124,15 @@ void sfd_dcl_empty_and_kill(struct sfd_dcl_storage *sfd_dcl)
 }
 
 // returns -1 on array size reached, 1 if 'v' is not unique, 0 if everything's OK, -2 on input data errors
-int sfd_dcl_add(struct sfd_dcl_storage *sfd_dcl, int sockfd, char *chunk, size_t size)
+// if ref_index is not NULL, it will contain the index of sockfd and dcl
+int sfd_dcl_add(struct sfd_dcl_storage *sfd_dcl, int sockfd, char *chunk, size_t size, size_t *ref_index)
 {
     if(sfd_dcl == NULL)
 	return -2;
     size_t pos, i, count = sfd_dcl->count;
     int r = put_to_sorted_array(sockfd, sfd_dcl->socketfds, sfd_dcl->size, &count, &pos, false);
+    if(ref_index != NULL)
+	*ref_index = pos;
     if(r == -1) {
 	msyslog(LOG_ERR, "Can't process the new socket since sfd_dcl limit reached: size = %d, count = %d", 
 		sfd_dcl->size, sfd_dcl->count);

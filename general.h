@@ -7,6 +7,7 @@
 #include <syslog.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 // at least 128 bytes for SSL!!!
 #define ERR_BUF_LEN	    256

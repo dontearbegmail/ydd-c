@@ -21,6 +21,6 @@ int accept_and_epoll(int listening_sfd, int efd, int op);
 #define READ_S_GOT_EAGAIN   1
 #define READ_S_GOT_ERROR    -1
 #define READ_S_KEEP_READING 2
-int read_form_socket_epollet(int sockfd, struct sfd_dcl_storage *sfd_dcl);
+int read_form_socket_epollet(int sockfd, struct sfd_dcl_storage *sfd_dcl, size_t *ref_dcl_index);
 
 #endif // COMM_H

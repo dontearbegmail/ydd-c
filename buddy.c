@@ -31,9 +31,8 @@ int main(int argc, char *argv[])
 #ifndef NDEBUG
     msyslog(LOG_DEBUG, "############# Running tests ");
     do_sfd_dcl_test(false);
-    do_dcl_test(true);
+    do_dcl_test(false);
     msyslog(LOG_DEBUG, "############# Finished tests ");
-    return 0;
 #endif //!NDEBUG
 
     sockfd = create_and_bind_socket(BUDDY_PORT, &ai);
@@ -72,8 +71,27 @@ int main(int argc, char *argv[])
 		process_all_incoming_connections(sockfd, efd, sfd_dcl);
 	    }
 
-	    else {
-		//int read_state = read_from_socket_epollet(events[i].data.fd, sfd_dcl);
+	    else if(events[i].events & EPOLLIN) {
+		size_t index, data_size;
+		printf("Got a read on socket %d\n", events[i].data.fd);
+		int read_state = read_form_socket_epollet(events[i].data.fd, sfd_dcl, &index);
+		if(read_state == READ_S_ALL_DONE) {
+		    msyslog(LOG_DEBUG, "Read all data on socket %d and will try to close the socket", 
+			    events[i].data.fd);
+		    close(events[i].data.fd);
+		    char *d = dcl_get_data(sfd_dcl->dcls[index], &data_size);
+		    printf("\n------\n%.*s\n-------\n", data_size, d);
+		    if(d != NULL)
+			free(d);
+		    sfd_dcl_delete_index(sfd_dcl, index);
+		}
+		else if(read_state == READ_S_GOT_EAGAIN) {
+		    printf("Got EAGAIN on socket %d. The data received by now: ", events[i].data.fd);
+		    char *d = dcl_get_data(sfd_dcl->dcls[index], &data_size);
+		    printf("%.*s\n", data_size, d);
+		    if(d != NULL)
+			free(d);
+		}
 	    }
 	}
     }
@@ -94,7 +112,7 @@ void app_shutdown(int sockfd, struct addrinfo *ai, struct sfd_dcl_storage *sfd_d
 
 void process_all_incoming_connections(int sockfd, int efd, struct sfd_dcl_storage *sfd_dcl)
 {
-    msyslog(LOG_DEBUG, "Starting to accept incoming connections");
+    msyslog(LOG_DEBUG, "Starting to process incoming connections");
     while(1) {
 	int infd = accept_and_epoll(sockfd, efd, EPOLLET);
 	if(infd == 0) {
@@ -110,7 +128,7 @@ void process_all_incoming_connections(int sockfd, int efd, struct sfd_dcl_storag
 	else {
 	    msyslog(LOG_DEBUG, "Successfully accepted an incoming connection on socket %d " 
 		    "and added it to epoll queue. See log above for details", infd);
-	    int r = sfd_dcl_add(sfd_dcl, infd, NULL, 0);
+	    int r = sfd_dcl_add(sfd_dcl, infd, NULL, 0, NULL);
 	    if(r != 0) { 
 		/* The saddest possible case: we're adding a new incoming connection socket file descriptor to our
 		 * SFD-DCL storage, but it's value is already present there. How could it happen? The only explanation

@@ -250,8 +250,11 @@ int accept_and_epoll(int listening_sfd, int efd, int op) {
  *	READ_S_GOT_EGAIN    if EAGAIN
  *	READ_S_GOT_ERROR    if error and the socket must be closed
  *	READ_S_KEEP_READING should never return that
+ *
+ * ref_dcl_index
+ *	if not NULL, will contain the index of sfd_dcl arrays corresponding to the given sockfd
  * */
-int read_form_socket_epollet(int sockfd, struct sfd_dcl_storage *sfd_dcl)
+int read_form_socket_epollet(int sockfd, struct sfd_dcl_storage *sfd_dcl, size_t *ref_dcl_index)
 {
     ssize_t count;
     char buf[DATA_CHUNK_SIZE];
@@ -276,7 +279,7 @@ int read_form_socket_epollet(int sockfd, struct sfd_dcl_storage *sfd_dcl)
 	    state = READ_S_ALL_DONE;
 	}
 	if(state == READ_S_KEEP_READING) 
-	    sfd_dcl_add(sfd_dcl, sockfd, buf, count);
+	    sfd_dcl_add(sfd_dcl, sockfd, buf, count, ref_dcl_index);
     }
 
     return state;

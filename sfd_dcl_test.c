@@ -1149,7 +1149,7 @@ void do_sfd_dcl_test(bool verbose)
 	    size_t sl = 0;
 	    if(tests[i]->in_add_chunk != NULL)
 		sl = strlen(tests[i]->in_add_chunk) + 1;
-	    sfd_dcl_add(sfd_dcl, tests[i]->in_add_sockfd, tests[i]->in_add_chunk, sl);
+	    sfd_dcl_add(sfd_dcl, tests[i]->in_add_sockfd, tests[i]->in_add_chunk, sl, NULL);
 	}
 	else if(tests[i]->action == ACTION_DELETE_INDEX) {
 	    if(sfd_dcl == NULL) {
