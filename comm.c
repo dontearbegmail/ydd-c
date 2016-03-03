@@ -270,10 +270,10 @@ int read_form_socket_epollet(int sockfd, struct sfd_dcl_storage *sfd_dcl, size_t
 	printf("Will read next %d bytes\n", DATA_CHUNK_SIZE);
 #endif*/
 	count = read(sockfd, buf, DATA_CHUNK_SIZE);
+        e = errno;
 	if(count == -1) {
-	    e = errno;
 	    /* If errno == EAGAIN, that means we have read all data available in the socket by now and have to return */
-	    if(e == EAGAIN) {
+	    if(e == EAGAIN || e == EWOULDBLOCK) {
 		state = READ_S_GOT_EAGAIN;
 	    }
 	    else {
@@ -292,6 +292,45 @@ int read_form_socket_epollet(int sockfd, struct sfd_dcl_storage *sfd_dcl, size_t
 	    printf("Have read the following %d bytes: %.*s\n", count, count, buf);
 #endif*/
     }
+
+    return state;
+}
+
+
+int send_to_socket_epollet(int sockfd, char *data, size_t size, size_t *ref_sent) 
+{
+    int state = SEND_S_KEEP_SENDING;
+    ssize_t count;
+    size_t sent = ref_sent == NULL ? 0 : *ref_sent;
+    int e;
+    do {
+	count = send(sockfd, data + sent, size - sent, 0);
+	e = errno;
+	sleep(10);
+	printf("Woke up\n");
+	if(count == -1) {
+	    if(e == EAGAIN || e == EWOULDBLOCK) {
+		state = SEND_S_GOT_EAGAIN;
+	    }
+	    else {
+		log_errno(e);
+		state = SEND_S_GOT_ERROR;
+	    }
+	}
+	else if((count == 0) || (sent == size)) {
+	    if((count == 0) && (sent == size)) 
+		state = SEND_S_ALL_DONE;
+	    else if(count != 0)
+		state = SEND_S_W_SENT_SIZE;
+	    else
+		state = SEND_S_W_SEND_FINISHED;
+	}
+	else {
+	    sent += count;
+	}
+    } while(state == SEND_S_KEEP_SENDING);
+    if(ref_sent != NULL)
+	*ref_sent = sent;
 
     return state;
 }
