@@ -80,7 +80,8 @@ int main(int argc, char *argv[])
 			    events[i].data.fd);
 		    close(events[i].data.fd);
 		    char *d = dcl_get_data(sfd_dcl->dcls[index], &data_size);
-		    printf("\n------\n%.*s\n-------\n", data_size, d);
+		    size_t output_size = d == NULL ? 6 : data_size;
+		    printf("\n------\n%.*s\n-------\n", output_size, d == NULL ? "(null)" : d);
 		    if(d != NULL)
 			free(d);
 		    sfd_dcl_delete_index(sfd_dcl, index);
@@ -88,7 +89,8 @@ int main(int argc, char *argv[])
 		else if(read_state == READ_S_GOT_EAGAIN) {
 		    printf("Got EAGAIN on socket %d. The data received by now: ", events[i].data.fd);
 		    char *d = dcl_get_data(sfd_dcl->dcls[index], &data_size);
-		    printf("%.*s\n", data_size, d);
+		    size_t output_size = d == NULL ? 6 : data_size;
+		    printf("%.*s\n", output_size, d == NULL ? "(null)" : d);
 		    if(d != NULL)
 			free(d);
 		}
