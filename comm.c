@@ -284,6 +284,7 @@ int read_form_socket_epollet(int sockfd, struct sfd_dcl_storage *sfd_dcl, size_t
 	/* End of file. The remote has closed the connection */
 	else if(count == 0) {
 	    state = READ_S_ALL_DONE;
+	    sfd_dcl_add(sfd_dcl, sockfd, NULL, 0, ref_dcl_index);
 	}
 	if(state == READ_S_KEEP_READING) 
 	    sfd_dcl_add(sfd_dcl, sockfd, buf, count, ref_dcl_index);
