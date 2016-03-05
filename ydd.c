@@ -112,12 +112,19 @@ int main(int argc, char *argv[])
 		}
 	    }*/
 	    else if((sockfd == events[i].data.fd) && (events[i].events & EPOLLOUT)) {
-		int res = sample_send(sockfd, msg, sz, &sent);
-		if(res == 0) {
+		int res = send_to_socket_epollet(sockfd, msg, sz, &sent);
+		if(res == SEND_S_ALL_DONE) {
 		    printf("All sent in epoll cycle\n");
 		}
-		else if(res == -1) {
-		    printf("Error in epoll cycle\n");
+		// TODO: decide what to do in the next 3 cases
+		else if(res == SEND_S_GOT_ERROR) {
+		    msyslog(LOG_ERR, "Got an error while callind send_to_socket_epollet on sockfd = %d", sockfd);
+		}
+		else if(res == SEND_S_W_SENT_SIZE) {
+		    msyslog(LOG_WARNING, "Got SEND_S_W_SENT_SIZE on sockfd = %d", sockfd);
+		}
+		else if(res == SEND_S_W_SEND_FINISHED) {
+		    msyslog(LOG_WARNING, "Got SEND_S_W_SEND_FINISHED on sockfd = %d", sockfd);
 		}
 		else {
 		    printf("Sent by now %d bytes\n", sent);
@@ -140,47 +147,3 @@ void app_shutdown(int sockfd, struct addrinfo *ai, struct sfd_dcl_storage *sfd_d
     closelog();
 }
 
-/* 0 = all sent
- * 1 = got epoll
- * -1 = error
- *
- * */
-int sample_send(int sockfd, char *msg, size_t sz, size_t *ref_sent)
-{
-    bool done = false;
-    bool got_epoll = false;
-    bool got_error = false;
-    ssize_t count;
-    size_t sent = ref_sent == NULL ? 0 : * ref_sent;
-    do {
-	count = send(sockfd, msg + sent, sz - sent, 0);
-	sleep(20);
-	printf("Woke up\n");
-	if(count == -1) {
-	    int e = errno;
-	    if(e == EAGAIN || e == EWOULDBLOCK) {
-		got_epoll = true;
-		printf("Got to epoll\n");
-	    }
-	    else {
-		got_error = true;
-		printf("Got error\n");
-	    }
-	}
-	else if((count == 0) && (sent == sz)) {
-	    done = true;
-	    printf("Sent all data :( \n");
-	}
-	else {
-	    sent += count;
-	}
-    } while(!done && !got_epoll && !got_error);
-    if(ref_sent != NULL)
-	*ref_sent = sent;
-
-    if(got_error)
-	return -1;
-    if(got_epoll)
-	return 1;
-    return 0;
-}

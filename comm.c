@@ -306,7 +306,7 @@ int send_to_socket_epollet(int sockfd, char *data, size_t size, size_t *ref_sent
     do {
 	count = send(sockfd, data + sent, size - sent, 0);
 	e = errno;
-	sleep(10);
+	sleep(5);
 	printf("Woke up\n");
 	if(count == -1) {
 	    if(e == EAGAIN || e == EWOULDBLOCK) {

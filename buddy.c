@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 	for(i = 0; i < n; i++) {
 	    /* An error has occured on this fd, or the socket is not
 	     * ready for reading (why were we notified then?) */
-	    if((events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP) || (!(events[i].events & EPOLLIN))) {
+	    if((events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP)) {
 		msyslog(LOG_ERR, "epoll error on socket %d", events[i].data.fd);
 		close(events[i].data.fd);
 		continue;
