@@ -64,7 +64,7 @@ int dcl_add_chunk(struct data_chunks_list *dcl, char *chunk, size_t size)
 
 char * dcl_get_data(struct data_chunks_list *dcl, size_t *ref_size)
 {
-    if(*ref_size != NULL)
+    if(ref_size != NULL)
 	*ref_size = 0;
     if(dcl == NULL)
 	return NULL;
