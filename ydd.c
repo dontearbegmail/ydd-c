@@ -6,17 +6,17 @@
 
 #ifndef NDEBUG
     #include "test.h"
-#endif // !NDEBUG
+#endif /* !NDEBUG */
 
 void app_shutdown(int sockfd, struct addrinfo *ai, struct sfd_dcl_storage *sfd_dcl);
-int sample_send(int sockfd, char *msg, size_t sz, size_t *ref_sent);
+void process_epoll_socket_error(struct epoll_event *event, int *main_sockfd, int *state);
 
 int main(int argc, char *argv[])
 {
     struct addrinfo *ai = NULL;
     char ip[INET_ADDRSTRLEN];
 
-    /* Main listening socket for accepting incoming connections */
+    /* Main socket for out client connection */
     int sockfd = -1;
     /* Main epoll queue fd */
     int efd = -1;
@@ -24,9 +24,9 @@ int main(int argc, char *argv[])
     struct sfd_dcl_storage *sfd_dcl = NULL;
     int n, i;
 
-    //----- APP INIT SECTION
+    /*----- APP INIT SECTION */
     openlog("ydd-client", LOG_PID, LOG_USER);
-    //----- APP INIT SECTION END
+    /*----- APP INIT SECTION END */
     
     get_server_addrinfo("192.168.1.78", "11437", false, &ai);
     get_ip_string(ai, ip);
@@ -66,74 +66,27 @@ int main(int argc, char *argv[])
 	app_shutdown(sockfd, ai, sfd_dcl);
     }
 
-    size_t sz = 1024 * 1024;
-    char msg[sz];
-    memset(msg, 'a', sz);
-    msg[sz - 1] = 0;
-    size_t sent = 0;
+#define MAIN_FSM_CYCLING	0
+#define MAIN_FSM_SOCKET_ERROR	-1
+    int state = MAIN_FSM_CYCLING;
 
-    while(1) {
+    while(state == MAIN_FSM_CYCLING) {
 	n = epoll_wait(efd, events, MAX_EVENTS, -1);
-	for(i = 0; i < n; i++) {
-	    /* An error has occured on this fd, or the socket is not
-	     * ready for reading (why were we notified then?) */
+	for(i = 0; (i < n) && (state == MAIN_FSM_CYCLING); i++) {
 	    if((events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP)) {
-		msyslog(LOG_ERR, "epoll error on socket %d", events[i].data.fd);
-		close(events[i].data.fd);
+		process_epoll_socket_error(&(events[i]), &sockfd, &state);
 		continue;
 	    }
 
-	    /* An event on our main listening socket - say hello to incoming connection(s) */
-	    /*else if(sockfd == events[i].data.fd) {
-		//process_all_incoming_connections(sockfd, efd, sfd_dcl);
-	    }*/
-
-	    /*
 	    else if(events[i].events & EPOLLIN) {
-		size_t index, data_size;
-		printf("Got a read on socket %d\n", events[i].data.fd);
-		int read_state = read_form_socket_epollet(events[i].data.fd, sfd_dcl, &index);
-		if(read_state == READ_S_ALL_DONE) {
-		    msyslog(LOG_DEBUG, "Read all data on socket %d and will try to close the socket", 
-			    events[i].data.fd);
-		    close(events[i].data.fd);
-		    char *d = dcl_get_data(sfd_dcl->dcls[index], &data_size);
-		    printf("\n------\n%.*s\n-------\n", data_size, d);
-		    if(d != NULL)
-			free(d);
-		    sfd_dcl_delete_index(sfd_dcl, index);
-		}
-		else if(read_state == READ_S_GOT_EAGAIN) {
-		    printf("Got EAGAIN on socket %d. The data received by now: ", events[i].data.fd);
-		    char *d = dcl_get_data(sfd_dcl->dcls[index], &data_size);
-		    printf("%.*s\n", data_size, d);
-		    if(d != NULL)
-			free(d);
-		}
-	    }*/
-	    else if((sockfd == events[i].data.fd) && (events[i].events & EPOLLOUT)) {
-		int res = send_to_socket_epollet(sockfd, msg, sz, &sent);
-		if(res == SEND_S_ALL_DONE) {
-		    printf("All sent in epoll cycle\n");
-		}
-		// TODO: decide what to do in the next 3 cases
-		else if(res == SEND_S_GOT_ERROR) {
-		    msyslog(LOG_ERR, "Got an error while callind send_to_socket_epollet on sockfd = %d", sockfd);
-		}
-		else if(res == SEND_S_W_SENT_SIZE) {
-		    msyslog(LOG_WARNING, "Got SEND_S_W_SENT_SIZE on sockfd = %d", sockfd);
-		}
-		else if(res == SEND_S_W_SEND_FINISHED) {
-		    msyslog(LOG_WARNING, "Got SEND_S_W_SEND_FINISHED on sockfd = %d", sockfd);
-		}
-		else {
-		    printf("Sent by now %d bytes\n", sent);
-		}
+	    }
+
+	    else if(events[i].events & EPOLLOUT) {
 	    }
 	}
     }
 
-    // ---- APP SHUTDOWN SECTION
+    /* ---- APP SHUTDOWN SECTION */
     app_shutdown(sockfd, ai, sfd_dcl);
 
     return 0;
@@ -147,3 +100,17 @@ void app_shutdown(int sockfd, struct addrinfo *ai, struct sfd_dcl_storage *sfd_d
     closelog();
 }
 
+void process_epoll_socket_error(struct epoll_event *event, int *main_sockfd, int *state)
+{
+    if((event == NULL) || (state == NULL) || main_sockfd == NULL)
+	return;
+    if(event->data.fd == *main_sockfd) {
+	*state = MAIN_FSM_SOCKET_ERROR;
+	msyslog(LOG_CRIT, "Got an epoll-error on the main socket (fd = %d). Can't proceed, will exit", *main_sockfd);
+	*main_sockfd = -1;
+    }
+    else {
+	msyslog(LOG_ERR, "epoll error on socket %d", event->data.fd);
+    }
+    close(event->data.fd);
+}

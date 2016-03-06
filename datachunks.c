@@ -125,8 +125,9 @@ void sfd_dcl_empty_and_kill(struct sfd_dcl_storage *sfd_dcl)
     free(sfd_dcl->socketfds);
 }
 
-// returns -1 on array size reached, 1 if 'v' is not unique, 0 if everything's OK, -2 on input data errors
-// if ref_index is not NULL, it will contain the index of sockfd and dcl
+/* returns -1 on array size reached, 1 if 'v' is not unique, 0 if everything's OK, -2 on input data errors
+ * if ref_index is not NULL, it will contain the index of sockfd and dcl
+ */
 int sfd_dcl_add(struct sfd_dcl_storage *sfd_dcl, int sockfd, char *chunk, size_t size, size_t *ref_index)
 {
     if(sfd_dcl == NULL)
@@ -140,8 +141,9 @@ int sfd_dcl_add(struct sfd_dcl_storage *sfd_dcl, int sockfd, char *chunk, size_t
 		sfd_dcl->size, sfd_dcl->count);
     }
     else {
-	if(r == 0) { // it means sockfd is a new, so sfd_dcl->socketfds were shifted right from 'pos' to 'count'
-		    // and now we have to do the same with sfd_dcl->dcls
+	if(r == 0) { /* it means sockfd is a new, so sfd_dcl->socketfds were shifted right from 'pos' to 'count'
+		      *	and now we have to do the same with sfd_dcl->dcls
+		      */
 	    if(pos < sfd_dcl->count) {
 		for(i = sfd_dcl->count; i > pos; i--) 
 		    sfd_dcl->dcls[i] = sfd_dcl->dcls[i - 1];
@@ -195,7 +197,7 @@ bool sfd_dcl_empty_dcl(struct sfd_dcl_storage *sfd_dcl, int sockfd)
     return true;
 }
 
-// returns -1 on array size reached, 1 if 'v' is not unique, 0 if everything's OK, -2 on input data errors
+/* returns -1 on array size reached, 1 if 'v' is not unique, 0 if everything's OK, -2 on input data errors */
 int put_to_sorted_array(int v, int *arr, size_t size, size_t *ref_count, size_t *ref_position, bool insert_duplicate)
 {
     if((arr == NULL) || (size == 0) || ( ref_position == NULL) || (ref_count == NULL))
@@ -214,7 +216,7 @@ int put_to_sorted_array(int v, int *arr, size_t size, size_t *ref_count, size_t 
     else {
 	found = find_in_sorted_array(v, arr, size, count, &pos);
 	if(found && (!insert_duplicate)) {
-	    //do nothing
+	    /*do nothing*/
 	}
 	else {
 	    if(count >= size) {
@@ -236,14 +238,15 @@ int put_to_sorted_array(int v, int *arr, size_t size, size_t *ref_count, size_t 
     return found ? 1 : 0;
 }
 
-// ref_position will always contain the index to put 'v'; returns true if 'v' already exists in array, false otherwise 
+/* ref_position will always contain the index to put 'v'; returns true if 'v' already exists in array, false otherwise */
 bool find_in_sorted_array(int v, int *arr, size_t size, size_t count, size_t *ref_position)
 {
     if((arr == NULL) || (ref_position == NULL))
 	return false;
-    bool found = false; // found == true means that value 'v' exists in array in arr[*ref_position]
-    bool finished = false; // (finished == true) && (found == false) means that value 'v' doesn't exist in array,
-			    // but *ref_position contains the position to put 'v'
+    bool found = false; /* found == true means that value 'v' exists in array in arr[*ref_position] */
+    bool finished = false; /* (finished == true) && (found == false) means that value 'v' doesn't exist in array,
+			    * but *ref_position contains the position to put 'v'
+			    */
     size_t start = 0;
     if(count == 0) {
 	*ref_position = 0;
@@ -259,7 +262,7 @@ bool find_in_sorted_array(int v, int *arr, size_t size, size_t count, size_t *re
      * is typically bigger than all the previous ones, our bubble search is optimized 
      * considering this fact (when adding new)  */
     do {
-	if(v > arr[end]) { // most searches will typically end here (when adding new)
+	if(v > arr[end]) { /* most searches will typically end here (when adding new) */
 	    finished = true;
 	    pos = end + 1;
 	}
@@ -276,7 +279,7 @@ bool find_in_sorted_array(int v, int *arr, size_t size, size_t count, size_t *re
 	    pos = end;
 	}
 	else {
-	    // now we have arr[start] < v < arr[end]
+	    /* now we have arr[start] < v < arr[end] */
 	    if(start >= end) {
 		finished = true;
 		pos = count;

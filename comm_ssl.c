@@ -1,3 +1,4 @@
+#include "general.h"
 #include "comm_ssl.h"
 
 void log_ssl_errors(void)
@@ -14,8 +15,8 @@ void log_ssl_errors(void)
 
 int init_ssl(SSL_CTX **out_ctx, SSL **out_ssl)
 {
-    SSL_load_error_strings(); // is void
-    SSL_library_init(); // always returns 1
+    SSL_load_error_strings(); /* is void */
+    SSL_library_init(); /* always returns 1 */
 
     *out_ctx = SSL_CTX_new(SSLv23_method()); 
     if(NULL == *out_ctx) {
@@ -24,7 +25,7 @@ int init_ssl(SSL_CTX **out_ctx, SSL **out_ssl)
     }
     *out_ssl = SSL_new(*out_ctx);
     if(NULL == *out_ssl) {
-	SSL_CTX_free(*out_ctx); // void
+	SSL_CTX_free(*out_ctx); /* void */
 	*out_ctx = NULL;
 	log_ssl_errors();
 	return -1;
@@ -35,17 +36,19 @@ int init_ssl(SSL_CTX **out_ctx, SSL **out_ssl)
 
 void shutdown_ssl(SSL_CTX *ctx, SSL *ssl)
 {
-    assert(NULL != ctx);
-    assert(NULL != ssl);
-    SSL_free(ssl); // void
-    SSL_CTX_free(ctx); // void
-    ERR_free_strings(); // void
+    if(ssl != NULL)
+	SSL_free(ssl); /* void */
+    if(ctx != NULL)
+	SSL_CTX_free(ctx); /* void */
+    ERR_free_strings(); /* void */
 }
 
 int open_ssl_connection(struct addrinfo *ai, SSL *ssl)
 {
-    assert(NULL != ai);
-    assert(NULL != ssl);
+    if(ai == NULL)
+	return -1;
+    if(ssl == NULL)
+	return -1;
 
     int e;
     int sockfd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
@@ -119,9 +122,9 @@ int open_ssl_connection(struct addrinfo *ai, SSL *ssl)
 int close_ssl_connection(int sockfd, SSL *ssl)
 {
     int retval = -1;
-    assert(NULL != ssl);
 
-    SSL_shutdown(ssl);
+    if(ssl != NULL)
+	SSL_shutdown(ssl);
     if(sockfd != -1)
 	retval = close(sockfd);
     return retval;

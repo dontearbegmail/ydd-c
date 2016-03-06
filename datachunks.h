@@ -7,9 +7,7 @@
 
 struct data_chunk {
     char chunk[DATA_CHUNK_SIZE];
-    size_t actual_size;	// 0 if the chunk is the default HTTP_CHUNK_SIZE,
-    // otherwise should contain actual size - it only 
-    // must be the last chunk in the list
+    size_t actual_size;	
     struct data_chunk *next;
 };
 
@@ -42,4 +40,4 @@ bool sfd_dcl_empty_dcl(struct sfd_dcl_storage *sfd_dcl, int sockfd);
 bool find_in_sorted_array(int v, int *arr, size_t size, size_t count, size_t *ref_position);
 int put_to_sorted_array(int v, int *arr, size_t size, size_t *ref_count, size_t *ref_position, bool insert_duplicate);
 
-#endif // DATACHUNKS_H
+#endif /* DATACHUNKS_H */

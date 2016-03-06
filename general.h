@@ -9,7 +9,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-// at least 128 bytes for SSL!!!
+/* at least 128 bytes for SSL!!! */
 #define ERR_BUF_LEN	    256
 
 #define BUDDY_PORT  "11437"
@@ -22,4 +22,4 @@
 #define log_errno(e) _log_errno(__FILE__, __func__, e);
 void _log_errno(const char *file, const char *func, int e);
 
-#endif // COMMON_H
+#endif /* COMMON_H */

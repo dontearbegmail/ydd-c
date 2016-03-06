@@ -29,24 +29,6 @@ int send_string_to_socket(int sockfd, char *str)
     return (bytes_sent == -1) ? -1 : (total_bytes_sent != len);
 }
 
-int read_from_socket(int sockfd)
-{
-    int size_recv;
-    char chunk[DATA_CHUNK_SIZE];
-    //while(1)
-    //{
-    memset(chunk, 0, DATA_CHUNK_SIZE);
-    if((size_recv = recv(sockfd,  chunk, DATA_CHUNK_SIZE, 0)) <= 0) {
-	//		break;
-    }
-    else {
-	//printf("%s", chunk);
-    }
-    //	}
-
-    return 0;
-}
-
 void get_ip_string(struct addrinfo *ai, char *inet_addrstr)
 {
     struct sockaddr_in *sai = (struct sockaddr_in *)ai->ai_addr; 
@@ -307,8 +289,6 @@ int send_to_socket_epollet(int sockfd, char *data, size_t size, size_t *ref_sent
     do {
 	count = send(sockfd, data + sent, size - sent, 0);
 	e = errno;
-	sleep(5);
-	printf("Woke up\n");
 	if(count == -1) {
 	    if(e == EAGAIN || e == EWOULDBLOCK) {
 		state = SEND_S_GOT_EAGAIN;

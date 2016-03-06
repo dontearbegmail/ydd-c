@@ -6,7 +6,7 @@
 
 #ifndef NDEBUG
     #include "test.h"
-#endif // !NDEBUG
+#endif /* !NDEBUG */
 
 void app_shutdown(int sockfd, struct addrinfo *ai, struct sfd_dcl_storage *sfd_dcl);
 void process_all_incoming_connections(int sockfd, int efd, struct sfd_dcl_storage *sfd_dcl);
@@ -24,16 +24,16 @@ int main(int argc, char *argv[])
     struct sfd_dcl_storage *sfd_dcl = NULL;
     int n, i;
 
-    //----- APP INIT SECTION
+    /*----- APP INIT SECTION */
     openlog("ydd", LOG_PID, LOG_USER);
-    //----- APP INIT SECTION END
+    /*----- APP INIT SECTION END */
     
 #ifndef NDEBUG
     msyslog(LOG_DEBUG, "############# Running tests ");
     do_sfd_dcl_test(false);
     do_dcl_test(false);
     msyslog(LOG_DEBUG, "############# Finished tests ");
-#endif //!NDEBUG
+#endif /* !NDEBUG */
 
     sockfd = create_and_bind_socket(BUDDY_PORT, &ai);
     if(sockfd == -1)
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     }
 
     while(1) {
-	n = epoll_wait(efd, events, MAX_EVENTS, -1);
+	n = epoll_pwait(efd, events, MAX_EVENTS, -1, NULL);
 	for(i = 0; i < n; i++) {
 	    /* An error has occured on this fd, or the socket is not
 	     * ready for reading (why were we notified then?) */
@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 	}
     }
 
-    // ---- APP SHUTDOWN SECTION
+    /* ---- APP SHUTDOWN SECTION */
     app_shutdown(sockfd, ai, sfd_dcl);
 
     return 0;
@@ -144,7 +144,7 @@ void process_all_incoming_connections(int sockfd, int efd, struct sfd_dcl_storag
 		else if(r == -1) {
 		    msyslog(LOG_WARNING, "SFD-DCL storage limit reached while trying to add an incoming connection "
 			    "with socketfd = %d. Will close the connection. TODO: add SFD-DCL storage cleaner", infd);
-		    close(infd); // epoll removes infd automatically from its' watchlist
+		    close(infd); /* epoll removes infd automatically from its' watchlist */
 		}
 		else if(r == -2) {
 		    /* Iput data error?? (i.e. sfd_dcl == NULL) This should never happen, but still... */
