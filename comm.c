@@ -1,5 +1,5 @@
 #include "comm.h"
-#include "datachunks.h"
+#include "socket_data.h"
 
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -237,10 +237,10 @@ int accept_and_epoll(int listening_sfd, int efd, int op) {
  *	READ_S_GOT_ERROR    if error and the socket must be closed
  *	READ_S_KEEP_READING should never return that
  *
- * ref_dcl_index
- *	if not NULL, will contain the index of sfd_dcl arrays corresponding to the given sockfd
+ * ref_sd_index
+ *	if not NULL, will contain the index of sfd_sd arrays corresponding to the given sockfd
  * */
-int read_form_socket_epollet(int sockfd, struct sfd_dcl_storage *sfd_dcl, size_t *ref_dcl_index)
+int read_form_socket_epollet(int sockfd, struct sfd_sd_storage *sfd_sd, size_t *ref_sd_index)
 {
     ssize_t count;
     char buf[DATA_CHUNK_SIZE];
@@ -266,10 +266,10 @@ int read_form_socket_epollet(int sockfd, struct sfd_dcl_storage *sfd_dcl, size_t
 	/* End of file. The remote has closed the connection */
 	else if(count == 0) {
 	    state = READ_S_ALL_DONE;
-	    sfd_dcl_add(sfd_dcl, sockfd, NULL, 0, ref_dcl_index);
+	    sfd_sd_add(sfd_sd, sockfd, NULL, 0, ref_sd_index);
 	}
 	if(state == READ_S_KEEP_READING) 
-	    sfd_dcl_add(sfd_dcl, sockfd, buf, count, ref_dcl_index);
+	    sfd_sd_add(sfd_sd, sockfd, buf, count, ref_sd_index);
 /*#ifndef NDEBUG
 	if(count >= 0) 
 	    printf("Have read the following %d bytes: %.*s\n", count, count, buf);

@@ -3,7 +3,7 @@
 
 #include <netdb.h>
 #include "general.h"
-#include "datachunks.h"
+#include "socket_data.h"
 
 int get_server_addrinfo(char *host, char *port, bool is_listening, struct addrinfo **out_server_addrinfo);
 void get_ip_string(struct addrinfo *ai, char *inet_addrstr);
@@ -21,7 +21,7 @@ int accept_and_epoll(int listening_sfd, int efd, int op);
 #define READ_S_GOT_EAGAIN   1
 #define READ_S_GOT_ERROR    -1
 #define READ_S_KEEP_READING 2
-int read_form_socket_epollet(int sockfd, struct sfd_dcl_storage *sfd_dcl, size_t *ref_dcl_index);
+int read_form_socket_epollet(int sockfd, struct sfd_sd_storage *sfd_sd, size_t *ref_sd_index);
 
 
 #define SEND_S_ALL_DONE		0

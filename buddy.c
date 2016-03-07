@@ -1,15 +1,17 @@
 #include "general.h"
 #include "comm.h"
-#include "datachunks.h"
+#include "socket_data.h"
 #include <sys/epoll.h>
 #include <stdio.h>
+
+#include "fsm_socket.h"
 
 #ifndef NDEBUG
     #include "test.h"
 #endif /* !NDEBUG */
 
-void app_shutdown(int sockfd, struct addrinfo *ai, struct sfd_dcl_storage *sfd_dcl);
-void process_all_incoming_connections(int sockfd, int efd, struct sfd_dcl_storage *sfd_dcl);
+void app_shutdown(int sockfd, struct addrinfo *ai, struct sfd_sd_storage *sfd_sd);
+void process_all_incoming_connections(int sockfd, int efd, struct sfd_sd_storage *sfd_sd);
 
 int main(int argc, char *argv[])
 {
@@ -21,7 +23,7 @@ int main(int argc, char *argv[])
     /* Main epoll queue fd */
     int efd = -1;
     struct epoll_event events[MAX_EVENTS];
-    struct sfd_dcl_storage *sfd_dcl = NULL;
+    struct sfd_sd_storage *sfd_sd = NULL;
     int n, i;
 
     /*----- APP INIT SECTION */
@@ -30,9 +32,10 @@ int main(int argc, char *argv[])
     
 #ifndef NDEBUG
     msyslog(LOG_DEBUG, "############# Running tests ");
-    do_sfd_dcl_test(false);
-    do_dcl_test(false);
+    /*do_sfd_sd_test(false);*/
+    do_sd_test(true);
     msyslog(LOG_DEBUG, "############# Finished tests ");
+    return 0;
 #endif /* !NDEBUG */
 
     sockfd = create_and_bind_socket(BUDDY_PORT, &ai);
@@ -44,15 +47,15 @@ int main(int argc, char *argv[])
     efd = init_epoll_and_listen(sockfd, EPOLLIN | EPOLLET);
     if(efd == -1) {
 	msyslog(LOG_ERR, "Failed to non-block/listen the socket %d, or to init epoll", sockfd);
-	app_shutdown(sockfd, ai, sfd_dcl);
+	app_shutdown(sockfd, ai, sfd_sd);
 	return -1;
     }
     msyslog(LOG_INFO, "Listening on %s:%s, non-blocking socket %d, epollfd %d", ip, BUDDY_PORT, sockfd, efd);
 
-    sfd_dcl = sfd_dcl_create(SFD_DCL_STORAGE_SIZE);
-    if(sfd_dcl == NULL) {
+    sfd_sd = sfd_sd_create(SFD_DCL_STORAGE_SIZE);
+    if(sfd_sd == NULL) {
 	msyslog(LOG_ERR, "Failed to create the main SFD-DCL storage");
-	app_shutdown(sockfd, ai, sfd_dcl);
+	app_shutdown(sockfd, ai, sfd_sd);
     }
 
     while(1) {
@@ -68,27 +71,27 @@ int main(int argc, char *argv[])
 
 	    /* An event on our main listening socket - say hello to incoming connection(s) */
 	    else if(sockfd == events[i].data.fd) {
-		process_all_incoming_connections(sockfd, efd, sfd_dcl);
+		process_all_incoming_connections(sockfd, efd, sfd_sd);
 	    }
 
 	    else if(events[i].events & EPOLLIN) {
 		size_t index, data_size;
 		printf("Got a read on socket %d\n", events[i].data.fd);
-		int read_state = read_form_socket_epollet(events[i].data.fd, sfd_dcl, &index);
+		int read_state = read_form_socket_epollet(events[i].data.fd, sfd_sd, &index);
 		if(read_state == READ_S_ALL_DONE) {
 		    msyslog(LOG_DEBUG, "Read all data on socket %d and will try to close the socket", 
 			    events[i].data.fd);
 		    close(events[i].data.fd);
-		    char *d = dcl_get_data(sfd_dcl->dcls[index], &data_size);
+		    char *d = sd_get_string(sfd_sd->sds[index], &data_size);
 		    size_t output_size = d == NULL ? 6 : data_size;
 		    printf("\n------\n%.*s\n-------\n", output_size, d == NULL ? "(null)" : d);
 		    if(d != NULL)
 			free(d);
-		    sfd_dcl_delete_index(sfd_dcl, index);
+		    sfd_sd_delete_index(sfd_sd, index);
 		}
 		else if(read_state == READ_S_GOT_EAGAIN) {
 		    printf("Got EAGAIN on socket %d. The data received by now: ", events[i].data.fd);
-		    char *d = dcl_get_data(sfd_dcl->dcls[index], &data_size);
+		    char *d = sd_get_string(sfd_sd->sds[index], &data_size);
 		    size_t output_size = d == NULL ? 6 : data_size;
 		    printf("%.*s\n", output_size, d == NULL ? "(null)" : d);
 		    if(d != NULL)
@@ -99,20 +102,20 @@ int main(int argc, char *argv[])
     }
 
     /* ---- APP SHUTDOWN SECTION */
-    app_shutdown(sockfd, ai, sfd_dcl);
+    app_shutdown(sockfd, ai, sfd_sd);
 
     return 0;
 }
 
-void app_shutdown(int sockfd, struct addrinfo *ai, struct sfd_dcl_storage *sfd_dcl)
+void app_shutdown(int sockfd, struct addrinfo *ai, struct sfd_sd_storage *sfd_sd)
 {
-    sfd_dcl_empty_and_kill(sfd_dcl);
+    sfd_sd_empty_and_kill(sfd_sd);
     close_socket(sockfd);
     freeaddrinfo(ai);
     closelog();
 }
 
-void process_all_incoming_connections(int sockfd, int efd, struct sfd_dcl_storage *sfd_dcl)
+void process_all_incoming_connections(int sockfd, int efd, struct sfd_sd_storage *sfd_sd)
 {
     msyslog(LOG_DEBUG, "Starting to process incoming connections");
     while(1) {
@@ -130,16 +133,16 @@ void process_all_incoming_connections(int sockfd, int efd, struct sfd_dcl_storag
 	else {
 	    msyslog(LOG_DEBUG, "Successfully accepted an incoming connection on socket %d " 
 		    "and added it to epoll queue. See log above for details", infd);
-	    int r = sfd_dcl_add(sfd_dcl, infd, NULL, 0, NULL);
+	    int r = sfd_sd_add(sfd_sd, infd, NULL, 0, NULL);
 	    if(r != 0) { 
 		/* The saddest possible case: we're adding a new incoming connection socket file descriptor to our
 		 * SFD-DCL storage, but it's value is already present there. How could it happen? The only explanation
 		 * that comes into mind: we added this infd earlier, but the connection was closed, and we didn't
 		 * notice that. So we have to clean DCL for that infd */
 		if(r == 1) {
-		    msyslog(LOG_WARNING, "sfd_dcl returned 1 when adding a new incoming connection "
+		    msyslog(LOG_WARNING, "sfd_sd returned 1 when adding a new incoming connection "
 			    "with socketfd = %d. Will empty the existing DCL", infd);
-		    sfd_dcl_empty_dcl(sfd_dcl, infd);
+		    sfd_sd_empty_sd(sfd_sd, infd);
 		}
 		else if(r == -1) {
 		    msyslog(LOG_WARNING, "SFD-DCL storage limit reached while trying to add an incoming connection "
@@ -147,8 +150,8 @@ void process_all_incoming_connections(int sockfd, int efd, struct sfd_dcl_storag
 		    close(infd); /* epoll removes infd automatically from its' watchlist */
 		}
 		else if(r == -2) {
-		    /* Iput data error?? (i.e. sfd_dcl == NULL) This should never happen, but still... */
-		    msyslog(LOG_WARNING, "Lucky me! sfd_dcl_add returned -2 which means input data error. "
+		    /* Iput data error?? (i.e. sfd_sd == NULL) This should never happen, but still... */
+		    msyslog(LOG_WARNING, "Lucky me! sfd_sd_add returned -2 which means input data error. "
 			    "Don't know what to do, so I'll continue hoping for the best and I'll pray for you :))");
 		}
 	    }
